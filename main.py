@@ -1,12 +1,11 @@
-from transcriber import transcribe_youtube_video
+from transcriber.transcriber import transcribe_youtube_video as tyv
 import argparse, os
 
 def main():
     parser = argparse.ArgumentParser(description="Transcribe a YouTube video using the OpenAI Whisper API.")
     parser.add_argument("video_url", help="The URL of the YouTube video to transcribe.")
     args = parser.parse_args()
-    # print(args)
-    response = transcribe_youtube_video(args.video_url)
+    response = tyv(args.video_url)
     print(response)   
 
     # save the transcript to a file in a directory called text if the directory doesn't exist, create it
