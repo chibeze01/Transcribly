@@ -108,11 +108,11 @@ class Transcriber:
         # Concatenate the results to form the full transcript
         transcript = "".join(results)
 
-        # for i, chunk in enumerate(os.listdir(chunk_folder)):
-        #     audio_chunk_path = f"{chunk_folder}/{chunk}"
-        #     with open(audio_chunk_path, "rb") as audio_file:
-        #         transcript += openai.Audio.transcribe(
-        #             "whisper-1", audio_file, prompt=self.prompt, response_format="text") + " "
+        for i, chunk in enumerate(os.listdir(chunk_folder)):
+            audio_chunk_path = f"{chunk_folder}/{chunk}"
+            with open(audio_chunk_path, "rb") as audio_file:
+                transcript += openai.Audio.transcribe(
+                    "whisper-1", audio_file, prompt=self.prompt, response_format="text") + " "
         result = {
             "audio_file": filename,
             "transcript": transcript,
