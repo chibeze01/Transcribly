@@ -1,8 +1,0 @@
-openai
-yt_dlp
-python-dotenv
-flask
-flask_cors
-moviepy
-pydub
-asyncio
