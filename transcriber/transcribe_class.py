@@ -2,12 +2,11 @@ import time
 import os
 import asyncio
 import yt_dlp
-from moviepy.editor import *
+from moviepy.editor import VideoFileClip
 import openai
 from pydub import AudioSegment
 from pydub.silence import *
 import re
-import numpy as np
 from dotenv import load_dotenv
 load_dotenv()
 
