@@ -20,9 +20,10 @@ const Footer = () => {
         alignItems: "center",
         justifyContent: "center",
         height: "5rem",
-        position: "absolute",
+        position: "relative",
         bottom: 0,
         width: "100%",
+        marginTop: "24px",
       }}
     >
       <Typography variant="body1">
