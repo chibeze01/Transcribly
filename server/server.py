@@ -12,6 +12,10 @@ def set_event_loop_policy():
         policy = asyncio.DefaultEventLoopPolicy()
         asyncio.set_event_loop_policy(policy)
 
+@app.route('/')
+def index():
+    return 'Hello World!', 200
+
 @app.route('/transcribe-media', methods=['POST'])
 async def transcribe():
     if 'file' not in request.files:
