@@ -4,7 +4,7 @@ from flask_cors import CORS
 import asyncio
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {"origins": "http://localhost/"}})
 
 def set_event_loop_policy():
     policy = asyncio.get_event_loop_policy()
