@@ -37,7 +37,7 @@ class Transcriber:
 
     def extract_audio_from_video_url(self, video_url):
         with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-            info_dict = ydl.extract_info(video_url, download=False)
+            info_dict = ydl.extract_info(video_url, download=True)
             filename = './tmp/audio/' + \
                 "{}.webm".format(info_dict.get("id", None))
         return filename

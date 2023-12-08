@@ -8,7 +8,7 @@ import { Grid } from "@mui/material";
 const Link = ({ setTranscription }) => {
   const [invalidLink, setInvalidLink] = React.useState(false);
   const [videoLink, setVideoLink] = React.useState("");
-
+  const BASEURL = "http://trancribly.onrender.com/transcribe-link";
   const handleSubmit = (event) => {
     event.preventDefault();
     const url = event.target[0].value;
@@ -23,7 +23,7 @@ const Link = ({ setTranscription }) => {
       const formData = new FormData();
       formData.append("link", videoLink);
       axios
-        .post("http://localhost:5000/transcribe-media", formData, {
+        .post(BASEURL + "/transcribe-link", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
