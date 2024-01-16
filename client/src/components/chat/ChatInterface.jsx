@@ -8,27 +8,21 @@ import ChatSessions from "./ChatSessions";
 
 const ChatInterface = () => {
 	return (
-		<div>
+		<ChatProvider>
 			<Toolbar sx={{ marginBottom: "8px" }} />
 			<Grid container spacing={2}>
 				<Grid item xs={3}>
-					<ChatProvider>
-						<ChatSessions />
-					</ChatProvider>
+					<ChatSessions />
 				</Grid>
 				<Grid item xs={6}>
-					<ChatProvider>
-						<ChatStream />
-						<ChatInput />
-					</ChatProvider>
+					<ChatStream />
+					<ChatInput />
 				</Grid>
 				<Grid item xs={3}>
-					<ChatProvider>
-						<ChatUpload />
-					</ChatProvider>
+					<ChatUpload />
 				</Grid>
 			</Grid>
-		</div>
+		</ChatProvider>
 	);
 };
 

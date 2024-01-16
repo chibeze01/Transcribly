@@ -41,7 +41,7 @@ const ChatProvider = ({ children }) => {
 			);
 			setMessages(threads[currentThreadId]);
 		}
-	}, [currentThreadId, threads]);
+	}, [threads, currentThreadId]);
 
 	// // Effect for storing threads in local storage
 	// useEffect(() => {

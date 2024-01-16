@@ -9,8 +9,10 @@ const ChatSessions = () => {
 		// console.log(threads[thread], thread);
 		loadThread(thread);
 	};
+	// const [threadKeys, setThreadKeys] = React.useState(Object.keys(threads));
 	useEffect(() => {
 		console.log(threads, "updated in chat sessions");
+		// setThreadKeys(Object.keys(threads));
 	}, [threads]);
 
 	return (
