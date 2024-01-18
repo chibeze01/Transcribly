@@ -11,14 +11,14 @@ const ChatInterface = () => {
 		<ChatProvider>
 			<Toolbar sx={{ marginBottom: "8px" }} />
 			<Grid container spacing={2}>
-				<Grid item xs={3}>
+				<Grid item xs={2} sx={{ borderRight: "1px solid lightgray" }}>
 					<ChatSessions />
 				</Grid>
-				<Grid item xs={6}>
+				<Grid item xs={7}>
 					<ChatStream />
 					<ChatInput />
 				</Grid>
-				<Grid item xs={3}>
+				<Grid item xs={3} sx={{ borderLeft: "1px solid lightgray" }}>
 					<ChatUpload />
 				</Grid>
 			</Grid>
