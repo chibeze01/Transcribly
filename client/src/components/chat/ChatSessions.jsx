@@ -1,19 +1,23 @@
 import React, { useContext, useEffect } from "react";
-import { Box, List, ListItemButton, ListItemText, Button } from "@mui/material";
+import {
+	Box,
+	List,
+	ListItemButton,
+	ListItemText,
+	Button,
+	ListItemIcon,
+} from "@mui/material";
 import { ChatContext } from "./ChatProvider";
-
+import { AddComment } from "@mui/icons-material";
 const ChatSessions = () => {
-	const { threads, loadThread } = useContext(ChatContext);
+	const { threads, loadThread, newChat } = useContext(ChatContext);
 
 	const handleClick = (thread) => {
-		// console.log(threads[thread], thread);
 		loadThread(thread);
 	};
-	// const [threadKeys, setThreadKeys] = React.useState(Object.keys(threads));
-	useEffect(() => {
-		console.log(threads, "updated in chat sessions");
-		// setThreadKeys(Object.keys(threads));
-	}, [threads]);
+	const handelNewChat = () => {
+		newChat();
+	};
 
 	return (
 		<Box
@@ -25,8 +29,8 @@ const ChatSessions = () => {
 			}}
 		>
 			<List>
-				<ListItemButton>
-					<ListItemText primary="New Chat" sx={{ textAlign: "center" }} />
+				<ListItemButton sx={{ display: "flex", justifyContent: "center" }}>
+					<AddComment onClick={() => handelNewChat()} />
 				</ListItemButton>
 				{Object.keys(threads).map((thread, index) => (
 					<ListItemButton key={index}>
@@ -34,7 +38,7 @@ const ChatSessions = () => {
 							onClick={() => handleClick(thread)}
 							sx={{ width: "100%", margin: 0, padding: 0 }}
 						>
-							{thread}
+							{threads[thread].title}
 						</Button>
 					</ListItemButton>
 				))}

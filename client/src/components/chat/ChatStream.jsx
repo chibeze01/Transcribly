@@ -6,10 +6,6 @@ import Message from "./Message";
 const ChatStream = () => {
 	const { messages } = React.useContext(ChatContext);
 
-	useEffect(() => {
-		console.log(messages, "updated in chat stream");
-	}, [messages]);
-
 	return (
 		<Box
 			sx={{

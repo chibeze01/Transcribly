@@ -7,16 +7,22 @@ export const user = {
 	name: "John Doe",
 	avatar: "https://example.com/john.jpg",
 	Threads: {
-		idx: [
-			{ text: "this is a message", author: "John Doe" },
-			{ text: "this is another message", author: "bot" },
-			{ text: "this is a message", author: "John Doe" },
-		],
-		idx2: [
-			{ text: "this is a message", author: "bot" },
-			{ text: "this is another message", author: "John Doe" },
-			{ text: "this is a message", author: "bot" },
-		],
+		idx: {
+			title: "messages",
+			chat: [
+				{ text: "this is a message", author: "John Doe" },
+				{ text: "this is another message", author: "bot" },
+				{ text: "this is a message", author: "John Doe" },
+			],
+		},
+		idx2: {
+			title: "another messages",
+			chat: [
+				{ text: "this is a message", author: "bot" },
+				{ text: "this is another message", author: "John Doe" },
+				{ text: "this is a message", author: "bot" },
+			],
+		},
 	},
 };
 
@@ -33,13 +39,7 @@ const ChatProvider = ({ children }) => {
 	// Effect for handling changes to currentThreadId
 	useEffect(() => {
 		if (currentThreadId) {
-			console.log(
-				threads[currentThreadId],
-				"call inside effect in chat provider",
-				threads,
-				currentThreadId
-			);
-			setMessages(threads[currentThreadId]);
+			setMessages(threads[currentThreadId].chat);
 		}
 	}, [threads, currentThreadId]);
 
@@ -53,22 +53,29 @@ const ChatProvider = ({ children }) => {
 		if (currentThreadId) {
 			setThreads((prevThreads) => ({
 				...prevThreads,
-				[currentThreadId]: [newMessage, ...prevThreads[currentThreadId]],
+				[currentThreadId]: {
+					...prevThreads[currentThreadId],
+					chat: [newMessage, ...prevThreads[currentThreadId].chat],
+				},
 			}));
 		} else {
 			const threadId = uuidv4();
 			setCurrentThread(threadId);
 			setThreads((prevThreads) => ({
-				[threadId]: [newMessage],
+				[threadId]: { title: "New Chat", chat: [newMessage] },
 				...prevThreads,
 			}));
 		}
 	};
 
+	const newChat = () => {
+		setMessages([]);
+		setCurrentThread(null);
+	};
+
 	const loadThread = (thread) => {
 		if (thread !== currentThreadId) {
 			setCurrentThread(thread);
-			console.log(threads[thread], "load thread");
 		}
 	};
 
@@ -79,6 +86,7 @@ const ChatProvider = ({ children }) => {
 				threads,
 				addMessage,
 				loadThread,
+				newChat,
 			}}
 		>
 			{children}

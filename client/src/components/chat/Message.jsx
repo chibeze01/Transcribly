@@ -4,7 +4,6 @@ import { user } from "./ChatProvider";
 
 const Message = ({ message }) => {
 	function stringAvatar(name) {
-		// console.log(name);
 		if (typeof name === "string") {
 			if (name === "bot") {
 				return {
