@@ -12,9 +12,8 @@ const ChatInput = () => {
 		setLoading(true);
 		addMessage(input);
 
-		// call api to handle message
-		const success = true; // addMessage(input);
-		// await new Promise((resolve) => setTimeout(resolve, 2000));
+		// maybe we call api to handle message handled in the sessions
+		const success = true;
 
 		if (success) {
 			setInput("");
@@ -32,7 +31,7 @@ const ChatInput = () => {
 			sx={{
 				display: "flex",
 				flexDirection: "row",
-				backgroundColor: "lightblue",
+				// backgroundColor: "lightblue",
 				alignItems: "center",
 				padding: "5px",
 			}}
@@ -44,6 +43,7 @@ const ChatInput = () => {
 				size="small"
 				placeholder="Message Transcribly..."
 				value={input}
+				autoComplete="off"
 				onChange={(e) => setInput(e.target.value)}
 				sx={{
 					backgroundColor: "white",

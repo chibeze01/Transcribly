@@ -10,7 +10,7 @@ const ChatStream = () => {
 		<Box
 			sx={{
 				height: "87vh",
-				backgroundColor: "lightblue",
+				// backgroundColor: "gray-white",
 				overflowY: "auto",
 				display: "flex",
 				flexDirection: "column-reverse",
