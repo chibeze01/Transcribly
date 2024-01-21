@@ -2,12 +2,13 @@ import React from "react";
 import { Button, TextField } from "@mui/material";
 import axios from "axios";
 import { CircularProgress } from "@mui/material";
+import { ChatContext } from "./chat/ChatProvider";
 
 const Link = ({ setTranscription }) => {
   const [invalidLink, setInvalidLink] = React.useState(false);
   const [videoLink, setVideoLink] = React.useState("");
+  const { loading, setLoading } = React.useContext(ChatContext);
   //   const [target_language, setTargetLanguage] = React.useState("en-US");
-  const [loading, setLoading] = React.useState(false);
   const handleChange = (value) => {
     setVideoLink(value);
     if (invalidLink && value === "") setInvalidLink(false);
@@ -36,7 +37,7 @@ const Link = ({ setTranscription }) => {
           },
         })
         .then((response) => {
-          setTranscription(response.data.transcription);
+          setTranscription(response.data.transcription, true);
           setLoading(false);
         })
         .catch((error) => {

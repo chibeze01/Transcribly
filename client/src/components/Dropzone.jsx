@@ -1,31 +1,34 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useContext } from "react";
 import { useDropzone } from "react-dropzone";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axios from "axios";
 import { Box, Typography } from "@mui/material";
+import { ChatContext } from "./chat/ChatProvider";
 
 function MyDropzone({ setTranscription }) {
   const [dropText, setDropText] = React.useState(
     "Drag and drop your media file here or click to select file"
   );
   const [file, setFile] = React.useState(null);
-
+  const { loading, setLoading } = useContext(ChatContext);
   const onDrop = useCallback(
     (acceptedFiles) => {
       const file = acceptedFiles[0];
       const formData = new FormData();
       formData.append("file", file);
       setFile(file.name);
+      setLoading(true);
       axios
         .post("http://localhost:5000/transcribe-media", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         })
-        .then((response) => setTranscription(response.data.transcription))
+        .then((response) => setTranscription(response.data.transcription, true))
+        .then(() => setLoading(false))
         .catch((error) => console.log(error));
     },
-    [setTranscription]
+    [setTranscription, setLoading]
   );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -41,9 +44,13 @@ function MyDropzone({ setTranscription }) {
 
   React.useEffect(() => {
     if (file) {
-      setDropText(`Transcribing ${file}...`);
+      if (loading) {
+        setDropText(`Transcribing ${file}...`);
+      } else {
+        setDropText(`Done Transcribing ${file}`);
+      }
     }
-  }, [file]);
+  }, [file, loading]);
 
   return (
     <Box
