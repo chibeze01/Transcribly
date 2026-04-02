@@ -48,7 +48,3 @@ Make sure to replace `my_image` with the name of your Docker image and `VIDEO_ID
 
 The transcript will be printed to the console. 🖨️
 
-This README.md file provides instructions on how to install and use the application, as well as how to run it using Docker. You can adapt it to your specific needs and preferences.
-
-Is there anything else you would like to know or discuss? 🤔
-Feel free to drop a message. 💬
