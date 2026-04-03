@@ -84,11 +84,11 @@ export default function HeroSection() {
             <span className="font-semibold text-white">~4s</span>
             <span className="ml-1 text-gray-500">avg transcription</span>
           </div>
-          <div className="border-gray-800 sm:border-l px-6">
+          <div className="sm:border-l sm:border-gray-800 px-6">
             <span className="font-semibold text-white">any length</span>
             <span className="ml-1 text-gray-500">auto-chunked audio</span>
           </div>
-          <div className="border-gray-800 sm:border-l px-6">
+          <div className="sm:border-l sm:border-gray-800 px-6">
             <span className="font-semibold text-white">pipe-ready</span>
             <span className="ml-1 text-gray-500">stdout output</span>
           </div>
