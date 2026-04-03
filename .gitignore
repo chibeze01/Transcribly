@@ -1,3 +1,7 @@
 .env
 # Ignore __pycache__ files
 */__pycache__/
+
+# CLI build artifacts
+cli/dist/
+cli/node_modules/
