@@ -4,10 +4,14 @@ export default function HeroSection() {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText("npx transcribly <youtube-url>").then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText("npx transcribly <youtube-url>")
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        // clipboard denied — silently ignore, button stays as "copy"
+      });
   };
 
   return (
@@ -75,16 +79,16 @@ export default function HeroSection() {
         </div>
 
         {/* Micro-stats */}
-        <div className="mt-10 flex items-center justify-center gap-0 text-sm">
+        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-0 text-sm">
           <div className="px-6">
             <span className="font-semibold text-white">~4s</span>
             <span className="ml-1 text-gray-500">avg transcription</span>
           </div>
-          <div className="border-l border-gray-800 px-6">
+          <div className="border-gray-800 sm:border-l px-6">
             <span className="font-semibold text-white">any length</span>
             <span className="ml-1 text-gray-500">auto-chunked audio</span>
           </div>
-          <div className="border-l border-gray-800 px-6">
+          <div className="border-gray-800 sm:border-l px-6">
             <span className="font-semibold text-white">pipe-ready</span>
             <span className="ml-1 text-gray-500">stdout output</span>
           </div>
