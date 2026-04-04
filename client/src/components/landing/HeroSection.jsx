@@ -18,7 +18,7 @@ export default function HeroSection() {
     <section className="relative flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-950 via-gray-900 to-black px-6 pt-16">
       {/* Subtle radial glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-1/3 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-600/10 blur-3xl" />
+        <div className="absolute left-1/2 top-1/3 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/10 blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl text-center">

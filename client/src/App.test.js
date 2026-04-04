@@ -1,8 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+beforeEach(() => jest.useFakeTimers());
+afterEach(() => {
+  act(() => jest.runAllTimers());
+  jest.useRealTimers();
+});
+
+test('renders landing page', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getAllByText('transcribly').length).toBeGreaterThan(0);
 });
