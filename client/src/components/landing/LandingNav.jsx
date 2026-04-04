@@ -1,4 +1,18 @@
+import { useState } from "react";
+
 export default function LandingNav() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard
+      .writeText("npm install -g transcribly")
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
+  };
+
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-800/50 bg-[#0a0a0a]/80 backdrop-blur-md px-6 py-4 font-mono sm:px-12">
       <span className="text-sm font-bold tracking-wider text-white">transcribly</span>
@@ -19,8 +33,15 @@ export default function LandingNav() {
         >
           github
         </a>
-        <button className="rounded border border-gray-700 px-3 py-1 font-mono text-xs text-gray-400 transition-colors hover:text-white">
-          npm install
+        <button
+          onClick={handleCopy}
+          className={`rounded border px-3 py-1 font-mono text-xs transition-colors ${
+            copied
+              ? "border-green-400/50 text-green-400"
+              : "border-gray-700 text-gray-400 hover:text-white"
+          }`}
+        >
+          {copied ? "copied!" : "npm install"}
         </button>
       </div>
     </nav>

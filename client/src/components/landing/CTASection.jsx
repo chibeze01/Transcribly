@@ -30,7 +30,7 @@ export default function CTASection() {
             in 30 seconds.
           </h2>
           <p className="mt-4 text-xs text-gray-500">
-            No account. No API key. Just Node.
+            One command. Your OpenAI key. That's it.
           </p>
         </ScrollReveal>
 

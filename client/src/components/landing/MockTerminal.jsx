@@ -136,9 +136,29 @@ export default function MockTerminal() {
     }, 600);
   }, [clearAllTimers, addTimeout, addInterval, removeTimer]);
 
+  // Restart animation when section scrolls into view
+  const sectionRef = useRef(null);
+
   useEffect(() => {
-    runDemo();
-    return clearAllTimers;
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          runDemo();
+        } else {
+          clearAllTimers();
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(section);
+    return () => {
+      observer.disconnect();
+      clearAllTimers();
+    };
   }, [runDemo, clearAllTimers]);
 
   const typedCmd = FULL_CMD.slice(0, typedCount);
@@ -146,7 +166,7 @@ export default function MockTerminal() {
   const spinnerChar = SPINNER_FRAMES[spinnerFrame];
 
   return (
-    <section className="relative bg-black px-6 py-24" id="demo">
+    <section ref={sectionRef} className="relative bg-black px-6 py-24" id="demo">
       <div className="mx-auto max-w-3xl">
         {/* Section label */}
         <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-green-400">
