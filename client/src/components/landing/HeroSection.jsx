@@ -1,9 +1,66 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import WaveformScene from "./WaveformScene";
 
+const PHRASES = [
+  "In your terminal.",
+  "YouTube videos.",
+  "Local audio files.",
+  "Piped to Claude.",
+  "Fed to your agent.",
+  "In one command.",
+];
+
+const TYPING_SPEED = 60;
+const DELETE_SPEED = 35;
+const PAUSE_AFTER_TYPE = 2000;
+const PAUSE_AFTER_DELETE = 400;
+
+function useTypingAnimation(phrases) {
+  const [text, setText] = useState("");
+  const phraseIndex = useRef(0);
+  const charIndex = useRef(0);
+  const isDeleting = useRef(false);
+  const timerRef = useRef(null);
+
+  const tick = useCallback(() => {
+    const current = phrases[phraseIndex.current];
+
+    if (!isDeleting.current) {
+      charIndex.current++;
+      setText(current.slice(0, charIndex.current));
+      if (charIndex.current === current.length) {
+        timerRef.current = setTimeout(() => {
+          isDeleting.current = true;
+          tick();
+        }, PAUSE_AFTER_TYPE);
+        return;
+      }
+      timerRef.current = setTimeout(tick, TYPING_SPEED);
+    } else {
+      charIndex.current--;
+      setText(current.slice(0, charIndex.current));
+      if (charIndex.current === 0) {
+        isDeleting.current = false;
+        phraseIndex.current = (phraseIndex.current + 1) % phrases.length;
+        timerRef.current = setTimeout(tick, PAUSE_AFTER_DELETE);
+        return;
+      }
+      timerRef.current = setTimeout(tick, DELETE_SPEED);
+    }
+  }, [phrases]);
+
+  useEffect(() => {
+    timerRef.current = setTimeout(tick, 800);
+    return () => clearTimeout(timerRef.current);
+  }, [tick]);
+
+  return text;
+}
+
 export default function HeroSection() {
   const [copied, setCopied] = useState(false);
+  const typedText = useTypingAnimation(PHRASES);
 
   const handleCopy = () => {
     navigator.clipboard
@@ -40,16 +97,21 @@ export default function HeroSection() {
           v1.0 — now with AI agent support
         </motion.div>
 
-        {/* Headline */}
-        <motion.h1
+        {/* Headline with typing animation */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.4 }}
-          className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
+          className="mx-auto mb-6 max-w-3xl"
         >
-          YouTube. As text.{" "}
-          <span className="block text-green-400">In your terminal.</span>
-        </motion.h1>
+          <h1 className="text-left text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+            <span className="whitespace-nowrap">Transcribe anything.</span>
+            <br />
+            <span className="inline-block min-h-[1.15em] text-green-400">
+              {typedText || "\u00A0"}
+            </span>
+          </h1>
+        </motion.div>
 
         {/* Subheadline */}
         <motion.p
@@ -58,8 +120,8 @@ export default function HeroSection() {
           transition={{ duration: 0.7, delay: 0.6 }}
           className="mx-auto mt-6 max-w-2xl text-lg text-gray-400 sm:text-xl"
         >
-          Transcribe any YouTube video from the CLI in seconds. Pipe the output
-          anywhere — your AI agent, your codebase, your notes.
+          Transcribe YouTube videos, local audio, and media files from the CLI.
+          Pipe the output anywhere — your AI agent, your codebase, your notes.
         </motion.p>
 
         {/* Command block */}
@@ -112,7 +174,7 @@ export default function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1.2 }}
-          className="mt-10 flex flex-col items-center gap-4 text-sm sm:flex-row sm:gap-0"
+          className="mt-10 flex flex-col items-center justify-center gap-4 text-sm sm:flex-row sm:gap-0"
         >
           <div className="px-6">
             <span className="font-semibold text-white">~4s</span>

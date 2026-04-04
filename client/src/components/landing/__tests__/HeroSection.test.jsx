@@ -11,12 +11,7 @@ beforeEach(() => {
 
 it('renders the main headline', () => {
   render(<HeroSection />);
-  expect(screen.getByText(/YouTube\. As text\./)).toBeInTheDocument();
-});
-
-it('renders "In your terminal." in green', () => {
-  render(<HeroSection />);
-  expect(screen.getByText(/In your terminal\./)).toBeInTheDocument();
+  expect(screen.getByText(/Transcribe anything\./)).toBeInTheDocument();
 });
 
 it('renders the npx command', () => {
