@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
 
 export const FULL_CMD = 'npx transcribly https://youtube.com/watch?v=dQw4w9WgXcQ';
 export const TYPING_SPEED = 36;
@@ -163,7 +164,12 @@ export default function MockTerminal() {
         </p>
 
         {/* Terminal window */}
-        <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-950 shadow-2xl">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7 }}
+          className="overflow-hidden rounded-xl border border-gray-800 bg-gray-950 shadow-2xl">
           {/* Title bar */}
           <div className="flex items-center gap-2 border-b border-gray-800 bg-gray-900 px-4 py-3">
             <span className="h-3 w-3 rounded-full bg-red-500" />
@@ -260,7 +266,7 @@ export default function MockTerminal() {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Replay button */}
         <div className="mt-4 text-center">
