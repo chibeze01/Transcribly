@@ -48,3 +48,54 @@ Make sure to replace `my_image` with the name of your Docker image and `VIDEO_ID
 
 The transcript will be printed to the console. 🖨️
 
+## CLI (Node.js / Bun)
+
+Transcribly is also available as a CLI tool that you can run with `npx` or `bun x`.
+
+### Prerequisites
+
+- Node.js 18+ (or Bun)
+- ffmpeg installed and available in your PATH
+- An OpenAI API key
+
+### Installation
+
+```bash
+# Run directly with npx (no install needed)
+npx transcribly <youtube-url>
+
+# Or install globally
+npm install -g transcribly
+```
+
+### CLI Usage
+
+```bash
+# Transcribe a YouTube video
+transcribly <youtube-url>
+
+# Transcribe a YouTube video (explicit command)
+transcribly url <youtube-url>
+
+# Transcribe a local audio/video file
+transcribly file ./path/to/audio.mp3
+
+# Specify output directory and format
+transcribly <youtube-url> --output ./transcripts --format json
+
+# Use a specific API key
+transcribly <youtube-url> --api-key sk-...
+```
+
+### CLI Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-o, --output <dir>` | Output directory for transcript files | `./text` |
+| `-f, --format <format>` | Output format (`txt` or `json`) | `txt` |
+| `-k, --api-key <key>` | OpenAI API key (or set `OPENAI_API_KEY` env var) | — |
+
+### Supported Audio Formats
+
+mp3, mp4, wav, webm, m4a, ogg, flac, mpeg, mpga
+
