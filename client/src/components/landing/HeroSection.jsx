@@ -1,7 +1,6 @@
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-
-const WaveformScene = lazy(() => import("./WaveformScene"));
+import WaveformScene from "./WaveformScene";
 
 export default function HeroSection() {
   const [copied, setCopied] = useState(false);
@@ -18,10 +17,8 @@ export default function HeroSection() {
 
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-black px-6 pt-16">
-      {/* 3D waveform background */}
-      <Suspense fallback={null}>
-        <WaveformScene />
-      </Suspense>
+      {/* Animated waveform background */}
+      <WaveformScene />
 
       {/* Radial glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">

@@ -22,14 +22,23 @@ jest.mock('framer-motion', () => {
   };
 });
 
-// Mock Three.js Canvas — jsdom has no WebGL
-jest.mock('@react-three/fiber', () => ({
-  Canvas: ({ children }) => null,
-  useFrame: () => {},
-  useThree: () => ({}),
-}));
-
-jest.mock('@react-three/drei', () => ({
-  Float: ({ children }) => children,
-  Environment: () => null,
-}));
+// Mock canvas getContext for jsdom (no real Canvas support)
+HTMLCanvasElement.prototype.getContext = function () {
+  return {
+    clearRect: () => {},
+    beginPath: () => {},
+    arc: () => {},
+    fill: () => {},
+    moveTo: () => {},
+    lineTo: () => {},
+    quadraticCurveTo: () => {},
+    closePath: () => {},
+    fillStyle: '',
+    shadowBlur: 0,
+    shadowColor: '',
+    scale: () => {},
+    createLinearGradient: () => ({
+      addColorStop: () => {},
+    }),
+  };
+};
