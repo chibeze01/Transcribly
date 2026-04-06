@@ -49,7 +49,7 @@ jobs:
           cache-dependency-path: client/package-lock.json
       - run: npm ci
         working-directory: client
-      - run: npx eslint src/
+      - run: npx eslint src/ --ext .js,.jsx
         working-directory: client
 
   pack:
