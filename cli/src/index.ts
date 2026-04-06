@@ -16,10 +16,9 @@ import {
   checkFfmpeg,
   createSpinner,
 } from "./utils";
-
-// Load .env from CLI directory or current working directory
-config({ path: path.resolve(process.cwd(), ".env") });
-config({ path: path.resolve(__dirname, "..", ".env") });
+import { readConfig, writeConfig } from "./config";
+import * as readline from "readline";
+import OpenAI from "openai";
 
 const program = new Command();
 
@@ -56,7 +55,12 @@ program
   .option("-o, --output <dir>", "Output directory", "./text")
   .option("-f, --format <format>", "Output format (txt or json)", "txt")
   .option("-k, --api-key <key>", "OpenAI API key")
+  .option("--setup", "Set up OpenAI API key interactively")
   .action(async (input: string | undefined, options) => {
+    if (options.setup) {
+      await runSetup();
+      return;
+    }
     if (!input) {
       program.help();
       return;
@@ -75,16 +79,132 @@ interface CommandOptions {
 }
 
 function getApiKey(options: CommandOptions): string {
-  const apiKey = options.apiKey || process.env.OPENAI_API_KEY;
+  // 1. --api-key flag
+  if (options.apiKey) return options.apiKey;
+
+  // 2. Real OPENAI_API_KEY env var (before loading .env)
+  const envKey = process.env.OPENAI_API_KEY;
+  if (envKey) return envKey;
+
+  // 3. ~/.transcribly/config.json
+  const configKey = readConfig().apiKey;
+  if (configKey) return configKey;
+
+  // 4. .env file in current working directory
+  config({ path: path.resolve(process.cwd(), ".env"), override: false });
+  if (process.env.OPENAI_API_KEY) return process.env.OPENAI_API_KEY;
+
+  // 5. .env in CLI directory
+  config({ path: path.resolve(__dirname, "..", ".env"), override: false });
+  if (process.env.OPENAI_API_KEY) return process.env.OPENAI_API_KEY;
+
+  // No key found — show helpful error
+  console.error(
+    chalk.red("Error: OpenAI API key required for transcription.\n")
+  );
+  console.error("Set it up in one of these ways:");
+  console.error("  1. Run: transcribly --setup");
+  console.error('  2. Set env var: export OPENAI_API_KEY="sk-..."');
+  console.error("  3. Add to .env file: OPENAI_API_KEY=sk-...");
+  console.error(
+    "\nGet your API key at: https://platform.openai.com/api-keys"
+  );
+  process.exit(1);
+}
+
+async function promptApiKey(): Promise<string> {
+  return new Promise((resolve) => {
+    process.stdout.write("Enter your OpenAI API key: ");
+
+    if (process.stdin.isTTY) {
+      // Mask input in interactive terminals
+      const stdin = process.stdin;
+      stdin.setRawMode!(true);
+      stdin.resume();
+      stdin.setEncoding("utf8");
+
+      let input = "";
+      const onData = (char: string) => {
+        const code = char.charCodeAt(0);
+        if (char === "\r" || char === "\n") {
+          stdin.setRawMode!(false);
+          stdin.pause();
+          stdin.removeListener("data", onData);
+          process.stdout.write("\n");
+          resolve(input.trim());
+        } else if (code === 3) {
+          // Ctrl+C
+          stdin.setRawMode!(false);
+          process.stdout.write("\n");
+          process.exit(1);
+        } else if (code === 127 || code === 8) {
+          // Backspace
+          if (input.length > 0) {
+            input = input.slice(0, -1);
+            process.stdout.write("\b \b");
+          }
+        } else {
+          input += char;
+          process.stdout.write("*");
+        }
+      };
+
+      stdin.on("data", onData);
+    } else {
+      // Non-TTY fallback (piped input)
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+      rl.question("", (answer) => {
+        rl.close();
+        resolve(answer.trim());
+      });
+    }
+  });
+}
+
+async function validateApiKey(apiKey: string): Promise<boolean> {
+  try {
+    const client = new OpenAI({ apiKey });
+    await client.models.list();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function runSetup(): Promise<void> {
+  console.log(chalk.bold("\nTranscribly — API Key Setup\n"));
+
+  const apiKey = await promptApiKey();
+
   if (!apiKey) {
-    console.error(
-      chalk.red(
-        "Error: OpenAI API key is required. Set OPENAI_API_KEY in your environment or use --api-key flag."
-      )
+    console.error(chalk.red("No API key entered. Setup cancelled."));
+    process.exit(1);
+  }
+
+  const spinner = createSpinner("Validating API key...");
+  spinner.start();
+
+  const valid = await validateApiKey(apiKey);
+  if (!valid) {
+    spinner.fail(
+      "API key validation failed. Please check the key and try again."
     );
     process.exit(1);
   }
-  return apiKey;
+
+  spinner.succeed("API key validated.");
+
+  writeConfig({ apiKey });
+
+  console.log(
+    chalk.green(
+      "\nAPI key saved to ~/.transcribly/config.json\n" +
+        "You can now run transcribly without setting OPENAI_API_KEY manually."
+    )
+  );
 }
 
 async function handleTranscribeUrl(
