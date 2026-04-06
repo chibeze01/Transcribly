@@ -10,11 +10,70 @@ npx transcribly https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
 That's it. The transcript prints to your terminal and saves to `./text/`.
 
-## Requirements
+## Prerequisites
 
-- [Node.js](https://nodejs.org/) 18+
-- [ffmpeg](https://ffmpeg.org/) installed and available in your `PATH`
-- An [OpenAI API key](https://platform.openai.com/api-keys)
+Transcribly requires the following system dependencies. Run `transcribly --doctor` to verify everything is set up correctly.
+
+### Node.js 18+
+
+Download from [nodejs.org](https://nodejs.org/) or install via a package manager:
+
+```bash
+# macOS (Homebrew)
+brew install node
+
+# Linux (Debian/Ubuntu)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Windows (winget)
+winget install OpenJS.NodeJS.LTS
+```
+
+### FFmpeg
+
+Required for audio processing. Must be available in your `PATH`.
+
+```bash
+# macOS (Homebrew)
+brew install ffmpeg
+
+# Linux (Debian/Ubuntu)
+sudo apt install ffmpeg
+
+# Linux (Fedora)
+sudo dnf install ffmpeg
+
+# Windows (Chocolatey)
+choco install ffmpeg
+
+# Windows (winget)
+winget install ffmpeg
+```
+
+### Python 3.8+
+
+Required by `yt-dlp` for YouTube audio downloads.
+
+```bash
+# macOS (Homebrew)
+brew install python3
+
+# Linux (Debian/Ubuntu)
+sudo apt install python3
+
+# Linux (Fedora)
+sudo dnf install python3
+
+# Windows
+# Download from https://www.python.org/downloads/
+# Or use winget:
+winget install Python.Python.3
+```
+
+### OpenAI API key
+
+Required for transcription via the Whisper API. Get your key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
 
 ## API key setup
 
@@ -85,6 +144,8 @@ transcribly file ./path/to/audio.mp3
 | `-o, --output <dir>` | Output directory for transcript files | `./text` |
 | `-f, --format <format>` | Output format: `txt` or `json` | `txt` |
 | `-k, --api-key <key>` | OpenAI API key (overrides `OPENAI_API_KEY` env var) | -- |
+| `--doctor` | Check all system dependencies and report status | -- |
+| `--setup` | Set up OpenAI API key interactively | -- |
 
 ## Output format
 

@@ -13,9 +13,9 @@ import {
   cleanupTempDir,
   ensureOutputDir,
   getOutputFilePath,
-  checkFfmpeg,
   createSpinner,
 } from "./utils";
+import { checkFfmpeg, checkPython, getFfmpegInstallMessage, getPythonInstallMessage, runDoctor } from "./dependencies";
 import { readConfig, writeConfig } from "./config";
 import * as readline from "readline";
 import OpenAI from "openai";
@@ -56,7 +56,12 @@ program
   .option("-f, --format <format>", "Output format (txt or json)", "txt")
   .option("-k, --api-key <key>", "OpenAI API key")
   .option("--setup", "Set up OpenAI API key interactively")
+  .option("--doctor", "Check all system dependencies and report status")
   .action(async (input: string | undefined, options) => {
+    if (options.doctor) {
+      await runDoctor();
+      return;
+    }
     if (options.setup) {
       await runSetup();
       return;
@@ -220,11 +225,17 @@ async function handleTranscribeUrl(
 
   const hasFfmpeg = await checkFfmpeg();
   if (!hasFfmpeg) {
-    console.error(
-      chalk.red(
-        "Error: ffmpeg is required but not found. Please install ffmpeg and ensure it is in your PATH."
-      )
-    );
+    console.error(chalk.red("Error: FFmpeg is required but not found."));
+    console.error(chalk.yellow(getFfmpegInstallMessage()));
+    console.error(chalk.gray("\nRun 'transcribly --doctor' to check all dependencies."));
+    process.exit(1);
+  }
+
+  const hasPython = await checkPython();
+  if (!hasPython) {
+    console.error(chalk.red("Error: Python 3.8+ is required but not found."));
+    console.error(chalk.yellow(getPythonInstallMessage()));
+    console.error(chalk.gray("\nRun 'transcribly --doctor' to check all dependencies."));
     process.exit(1);
   }
 
@@ -253,11 +264,9 @@ async function handleTranscribeFile(
 
   const hasFfmpeg = await checkFfmpeg();
   if (!hasFfmpeg) {
-    console.error(
-      chalk.red(
-        "Error: ffmpeg is required but not found. Please install ffmpeg and ensure it is in your PATH."
-      )
-    );
+    console.error(chalk.red("Error: FFmpeg is required but not found."));
+    console.error(chalk.yellow(getFfmpegInstallMessage()));
+    console.error(chalk.gray("\nRun 'transcribly --doctor' to check all dependencies."));
     process.exit(1);
   }
 

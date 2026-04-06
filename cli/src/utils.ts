@@ -60,11 +60,3 @@ export function getOutputFilePath(
   return path.join(outputDir, `${baseName}.${format}`);
 }
 
-export function checkFfmpeg(): Promise<boolean> {
-  return new Promise((resolve) => {
-    const { exec } = require("child_process");
-    exec("ffmpeg -version", (error: Error | null) => {
-      resolve(!error);
-    });
-  });
-}
