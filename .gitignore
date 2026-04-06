@@ -5,3 +5,6 @@
 # CLI build artifacts
 cli/dist/
 cli/node_modules/
+
+# Root node_modules
+node_modules/
