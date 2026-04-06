@@ -22,6 +22,15 @@ jest.mock('framer-motion', () => {
   };
 });
 
+// Mock IntersectionObserver for jsdom (not available in jsdom)
+class IntersectionObserver {
+  constructor(cb) { this._cb = cb; }
+  observe() { this._cb([{ isIntersecting: true }]); }
+  unobserve() {}
+  disconnect() {}
+}
+window.IntersectionObserver = IntersectionObserver;
+
 // Mock canvas getContext for jsdom (no real Canvas support)
 HTMLCanvasElement.prototype.getContext = function () {
   return {
