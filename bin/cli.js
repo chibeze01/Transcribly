@@ -124,26 +124,28 @@ async function transcribeAudio(filePath, apiKey, verbose) {
   const chunks = await splitAudio(filePath, verbose);
 
   const transcripts = [];
-  for (let i = 0; i < chunks.length; i++) {
-    if (verbose) {
-      process.stderr.write(
-        chunks.length > 1
-          ? `Transcribing chunk ${i + 1}/${chunks.length}...\n`
-          : 'Transcribing...\n'
-      );
+  try {
+    for (let i = 0; i < chunks.length; i++) {
+      if (verbose) {
+        process.stderr.write(
+          chunks.length > 1
+            ? `Transcribing chunk ${i + 1}/${chunks.length}...\n`
+            : 'Transcribing...\n'
+        );
+      }
+      const fileStream = fs.createReadStream(chunks[i]);
+      const response = await client.audio.transcriptions.create({
+        model: 'whisper-1',
+        file: fileStream,
+        response_format: 'text',
+      });
+      transcripts.push(String(response).trim());
     }
-    const fileStream = fs.createReadStream(chunks[i]);
-    const response = await client.audio.transcriptions.create({
-      model: 'whisper-1',
-      file: fileStream,
-      response_format: 'text',
-    });
-    transcripts.push(String(response).trim());
-  }
-
-  // Clean up chunk temp dir
-  if (chunks.length > 1 && chunks[0] !== filePath) {
-    fs.rmSync(path.dirname(chunks[0]), { recursive: true, force: true });
+  } finally {
+    // Clean up chunk temp dir even if transcription fails
+    if (chunks.length > 1 && chunks[0] !== filePath) {
+      fs.rmSync(path.dirname(chunks[0]), { recursive: true, force: true });
+    }
   }
 
   return transcripts.join(' ');
