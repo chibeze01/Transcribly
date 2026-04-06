@@ -25,7 +25,9 @@ export function writeConfig(config: Config): void {
   const filePath = getConfigFilePath();
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  } else {
+    fs.chmodSync(dir, 0o700);
   }
-  fs.writeFileSync(filePath, JSON.stringify(config, null, 2));
+  fs.writeFileSync(filePath, JSON.stringify(config, null, 2), { mode: 0o600 });
 }

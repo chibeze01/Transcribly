@@ -113,15 +113,54 @@ function getApiKey(options: CommandOptions): string {
 }
 
 async function promptApiKey(): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
   return new Promise((resolve) => {
-    rl.question("Enter your OpenAI API key: ", (answer) => {
-      rl.close();
-      resolve(answer.trim());
-    });
+    process.stdout.write("Enter your OpenAI API key: ");
+
+    if (process.stdin.isTTY) {
+      // Mask input in interactive terminals
+      const stdin = process.stdin;
+      stdin.setRawMode!(true);
+      stdin.resume();
+      stdin.setEncoding("utf8");
+
+      let input = "";
+      const onData = (char: string) => {
+        const code = char.charCodeAt(0);
+        if (char === "\r" || char === "\n") {
+          stdin.setRawMode!(false);
+          stdin.pause();
+          stdin.removeListener("data", onData);
+          process.stdout.write("\n");
+          resolve(input.trim());
+        } else if (code === 3) {
+          // Ctrl+C
+          stdin.setRawMode!(false);
+          process.stdout.write("\n");
+          process.exit(1);
+        } else if (code === 127 || code === 8) {
+          // Backspace
+          if (input.length > 0) {
+            input = input.slice(0, -1);
+            process.stdout.write("\b \b");
+          }
+        } else {
+          input += char;
+          process.stdout.write("*");
+        }
+      };
+
+      stdin.on("data", onData);
+    } else {
+      // Non-TTY fallback (piped input)
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+      rl.question("", (answer) => {
+        rl.close();
+        resolve(answer.trim());
+      });
+    }
   });
 }
 

@@ -43,21 +43,31 @@ describe("writeConfig", () => {
     jest.resetAllMocks();
   });
 
-  it("creates config directory if it does not exist", () => {
+  it("creates config directory with mode 0o700 if it does not exist", () => {
     fs.existsSync.mockReturnValue(false);
     writeConfig({ apiKey: "sk-abc" });
     expect(fs.mkdirSync).toHaveBeenCalledWith(
       path.join(os.homedir(), ".transcribly"),
-      { recursive: true }
+      { recursive: true, mode: 0o700 }
     );
   });
 
-  it("writes JSON to config file", () => {
+  it("chmods existing config directory to 0o700", () => {
+    fs.existsSync.mockReturnValue(true);
+    writeConfig({ apiKey: "sk-abc" });
+    expect(fs.chmodSync).toHaveBeenCalledWith(
+      path.join(os.homedir(), ".transcribly"),
+      0o700
+    );
+  });
+
+  it("writes JSON to config file with mode 0o600", () => {
     fs.existsSync.mockReturnValue(true);
     writeConfig({ apiKey: "sk-xyz" });
     expect(fs.writeFileSync).toHaveBeenCalledWith(
       path.join(os.homedir(), ".transcribly", "config.json"),
-      JSON.stringify({ apiKey: "sk-xyz" }, null, 2)
+      JSON.stringify({ apiKey: "sk-xyz" }, null, 2),
+      { mode: 0o600 }
     );
   });
 });
