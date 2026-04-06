@@ -1,101 +1,134 @@
-# 📺 YouTube Video Transcriber
+# Transcribly — YouTube transcripts from the terminal
 
-This Python application uses the OpenAI Whisper API to transcribe the audio from a YouTube video. 🎙️
+A CLI tool that transcribes YouTube videos and local audio/video files using the OpenAI Whisper API.
+
+## Quick start
+
+```bash
+npx transcribly https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
+That's it. The transcript prints to your terminal and saves to `./text/`.
 
 ## Requirements
 
-- Python 3.8 or higher
-- OpenAI API credentials stored in the OpenAI Secret Manager
+- [Node.js](https://nodejs.org/) 18+
+- [ffmpeg](https://ffmpeg.org/) installed and available in your `PATH`
+- An [OpenAI API key](https://platform.openai.com/api-keys)
 
-## Installation
+## API key setup
 
-1. Clone this repository and navigate to the project directory: `git clone https://github.com/your-username/your-repository.git && cd your-repository`
+Set your API key as an environment variable:
 
-2. Install the required dependencies: `pip install -r requirements.txt`
+```bash
+export OPENAI_API_KEY="sk-..."
+```
 
-## Setup API KEY 🔑
+Or pass it directly:
 
-To set up the API key, use the `.env.template` file and set your API key: `OPENAI_API_KEY = YOUR_API_KEY`
+```bash
+npx transcribly <youtube-url> --api-key sk-...
+```
 
-Then rename the `.env.template` to `.env`
+You can also create a `.env` file in your working directory:
+
+```
+OPENAI_API_KEY=sk-...
+```
 
 ## Usage
 
-To transcribe a YouTube video, run the `main.py` script and provide the URL of the video as a command-line argument: `python main.py https://www.youtube.com/watch?v=VIDEO_ID`
-
-Make sure to replace `VIDEO_ID` with the actual ID of the YouTube video you want to transcribe.
-
-The transcript will be printed to the console in the form. 📜
-
-```json
-{
-  "video_is": "video ID",
-  "audio_file": "Audio file loaction",
-  "transcript": "transcript text",
-  "url": "url"
-}
-```
-
-## Docker 🐳
-
-You can also run this application using Docker. To build a Docker image, run the following command in the project directory: `docker build -t my_image .`
-
-Make sure to replace `my_image` with a suitable name for your Docker image.
-
-To run a Docker container and transcribe a YouTube video, use the following command: `docker run my_image https://www.youtube.com/watch?v=VIDEO_ID`
-
-Make sure to replace `my_image` with the name of your Docker image and `VIDEO_ID` with the actual ID of the YouTube video you want to transcribe.
-
-The transcript will be printed to the console. 🖨️
-
-## CLI (Node.js / Bun)
-
-Transcribly is also available as a CLI tool that you can run with `npx` or `bun x`.
-
-### Prerequisites
-
-- Node.js 18+ (or Bun)
-- ffmpeg installed and available in your PATH
-- An OpenAI API key
-
-### Installation
+### Transcribe a YouTube video
 
 ```bash
-# Run directly with npx (no install needed)
-npx transcribly <youtube-url>
-
-# Or install globally
-npm install -g transcribly
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID
 ```
 
-### CLI Usage
+### Transcribe a local audio or video file
 
 ```bash
-# Transcribe a YouTube video
-transcribly <youtube-url>
+npx transcribly file ./interview.mp3
+```
 
-# Transcribe a YouTube video (explicit command)
-transcribly url <youtube-url>
+### Pipe output to a file
 
-# Transcribe a local audio/video file
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID > transcript.txt
+```
+
+### Pipe to another tool
+
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | claude "Summarise this"
+```
+
+### Save as JSON
+
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID --format json
+```
+
+### Explicit subcommands
+
+```bash
+# YouTube URL
+transcribly url https://www.youtube.com/watch?v=VIDEO_ID
+
+# Local file
 transcribly file ./path/to/audio.mp3
-
-# Specify output directory and format
-transcribly <youtube-url> --output ./transcripts --format json
-
-# Use a specific API key
-transcribly <youtube-url> --api-key sk-...
 ```
 
-### CLI Options
+## Options
 
 | Option | Description | Default |
 |--------|-------------|---------|
 | `-o, --output <dir>` | Output directory for transcript files | `./text` |
-| `-f, --format <format>` | Output format (`txt` or `json`) | `txt` |
-| `-k, --api-key <key>` | OpenAI API key (or set `OPENAI_API_KEY` env var) | — |
+| `-f, --format <format>` | Output format: `txt` or `json` | `txt` |
+| `-k, --api-key <key>` | OpenAI API key (overrides `OPENAI_API_KEY` env var) | -- |
 
-### Supported Audio Formats
+## Output format
+
+**Text (default)** — plain transcript text, saved to `./text/<video-id>.txt`.
+
+**JSON** — structured output, saved to `./text/<video-id>.json`:
+
+```json
+{
+  "audioFile": "/path/to/downloaded/audio.mp3",
+  "transcript": "The full transcript text..."
+}
+```
+
+## Supported audio formats
 
 mp3, mp4, wav, webm, m4a, ogg, flac, mpeg, mpga
 
+Large files (>24 MB) are automatically split into chunks before transcription.
+
+## Global install
+
+```bash
+npm install -g transcribly
+transcribly https://www.youtube.com/watch?v=VIDEO_ID
+```
+
+## Programmatic usage
+
+```js
+const { transcribe } = require("transcribly/dist/transcriber");
+
+const result = await transcribe("./audio.mp3", process.env.OPENAI_API_KEY);
+console.log(result.transcript);
+```
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b my-feature`)
+3. Commit your changes (`git commit -m "Add my feature"`)
+4. Push to the branch (`git push origin my-feature`)
+5. Open a pull request
+
+## License
+
+[MIT](LICENSE.md)
