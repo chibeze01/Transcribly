@@ -117,8 +117,10 @@ transcribly https://www.youtube.com/watch?v=VIDEO_ID
 ```js
 const { transcribe } = require("transcribly/dist/transcriber");
 
-const result = await transcribe("./audio.mp3", process.env.OPENAI_API_KEY);
-console.log(result.transcript);
+(async () => {
+  const result = await transcribe("./audio.mp3", process.env.OPENAI_API_KEY);
+  console.log(result.transcript);
+})();
 ```
 
 ## Contributing
