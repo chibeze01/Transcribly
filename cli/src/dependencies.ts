@@ -1,5 +1,10 @@
 import { exec } from "child_process";
+import * as path from "path";
 import chalk from "chalk";
+import { config } from "dotenv";
+
+const MIN_PYTHON_MAJOR = 3;
+const MIN_PYTHON_MINOR = 8;
 
 export function checkFfmpeg(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -9,12 +14,43 @@ export function checkFfmpeg(): Promise<boolean> {
   });
 }
 
-export function checkPython(): Promise<boolean> {
+export interface PythonCheckResult {
+  ok: boolean;
+  version?: string;
+}
+
+export function parsePythonVersion(output: string): { major: number; minor: number } | null {
+  const match = output.match(/Python\s+(\d+)\.(\d+)/);
+  if (!match) return null;
+  return { major: parseInt(match[1], 10), minor: parseInt(match[2], 10) };
+}
+
+function meetsMinVersion(ver: { major: number; minor: number }): boolean {
+  return ver.major > MIN_PYTHON_MAJOR ||
+    (ver.major === MIN_PYTHON_MAJOR && ver.minor >= MIN_PYTHON_MINOR);
+}
+
+export function checkPython(): Promise<PythonCheckResult> {
   return new Promise((resolve) => {
-    exec("python3 --version", (error) => {
-      if (!error) return resolve(true);
-      exec("python --version", (error2) => {
-        resolve(!error2);
+    exec("python3 --version", (error, stdout, stderr) => {
+      const output = (stdout || "") + (stderr || "");
+      if (!error) {
+        const ver = parsePythonVersion(output);
+        if (ver && meetsMinVersion(ver)) {
+          return resolve({ ok: true, version: output.trim().replace(/^Python\s*/, "") });
+        }
+        return resolve({ ok: false, version: output.trim().replace(/^Python\s*/, "") });
+      }
+      exec("python --version", (error2, stdout2, stderr2) => {
+        const output2 = (stdout2 || "") + (stderr2 || "");
+        if (!error2) {
+          const ver = parsePythonVersion(output2);
+          if (ver && meetsMinVersion(ver)) {
+            return resolve({ ok: true, version: output2.trim().replace(/^Python\s*/, "") });
+          }
+          return resolve({ ok: false, version: output2.trim().replace(/^Python\s*/, "") });
+        }
+        resolve({ ok: false });
       });
     });
   });
@@ -51,23 +87,35 @@ export function getPythonInstallMessage(): string {
 export async function runDoctor(): Promise<void> {
   console.log(chalk.bold("\nTranscribly — Dependency Check\n"));
 
-  const checks: { name: string; check: () => Promise<boolean>; installMsg: string }[] = [
-    { name: "FFmpeg", check: checkFfmpeg, installMsg: getFfmpegInstallMessage() },
-    { name: "Python 3", check: checkPython, installMsg: getPythonInstallMessage() },
-  ];
-
   let allPassed = true;
 
-  for (const { name, check, installMsg } of checks) {
-    const ok = await check();
-    if (ok) {
-      console.log(chalk.green(`  ✓ ${name} found`));
-    } else {
-      console.log(chalk.red(`  ✗ ${name} not found`));
-      console.log(chalk.yellow(`    ${installMsg}`));
-      allPassed = false;
-    }
+  // Check FFmpeg
+  const hasFfmpeg = await checkFfmpeg();
+  if (hasFfmpeg) {
+    console.log(chalk.green("  ✓ FFmpeg found"));
+  } else {
+    console.log(chalk.red("  ✗ FFmpeg not found"));
+    console.log(chalk.yellow(`    ${getFfmpegInstallMessage()}`));
+    allPassed = false;
   }
+
+  // Check Python with version validation
+  const pythonResult = await checkPython();
+  if (pythonResult.ok) {
+    console.log(chalk.green(`  ✓ Python ${pythonResult.version ?? ""} (${MIN_PYTHON_MAJOR}.${MIN_PYTHON_MINOR}+ required)`));
+  } else if (pythonResult.version) {
+    console.log(chalk.red(`  ✗ Python ${pythonResult.version} found, but ${MIN_PYTHON_MAJOR}.${MIN_PYTHON_MINOR}+ is required`));
+    console.log(chalk.yellow(`    ${getPythonInstallMessage()}`));
+    allPassed = false;
+  } else {
+    console.log(chalk.red("  ✗ Python not found"));
+    console.log(chalk.yellow(`    ${getPythonInstallMessage()}`));
+    allPassed = false;
+  }
+
+  // Load .env files to match runtime key resolution order
+  config({ path: path.resolve(process.cwd(), ".env"), override: false });
+  config({ path: path.resolve(__dirname, "..", ".env"), override: false });
 
   // Check OpenAI API key availability
   const hasApiKey = !!(

@@ -231,9 +231,13 @@ async function handleTranscribeUrl(
     process.exit(1);
   }
 
-  const hasPython = await checkPython();
-  if (!hasPython) {
-    console.error(chalk.red("Error: Python 3.8+ is required but not found."));
+  const pythonResult = await checkPython();
+  if (!pythonResult.ok) {
+    if (pythonResult.version) {
+      console.error(chalk.red(`Error: Python ${pythonResult.version} found, but 3.8+ is required.`));
+    } else {
+      console.error(chalk.red("Error: Python 3.8+ is required but not found."));
+    }
     console.error(chalk.yellow(getPythonInstallMessage()));
     console.error(chalk.gray("\nRun 'transcribly --doctor' to check all dependencies."));
     process.exit(1);
