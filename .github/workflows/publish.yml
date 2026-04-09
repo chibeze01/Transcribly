@@ -52,6 +52,9 @@ jobs:
         working-directory: cli
       - run: npm run build
         working-directory: cli
+      - name: Smoke test
+        run: npx transcribly --help
+        working-directory: cli
       - run: npm publish
         working-directory: cli
         env:
