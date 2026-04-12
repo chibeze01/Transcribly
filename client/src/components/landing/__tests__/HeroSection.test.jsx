@@ -21,7 +21,7 @@ it('renders the npx command', () => {
 
 it('renders Get started button linking to #demo', () => {
   render(<HeroSection />);
-  const link = screen.getByText(/Get started/).closest('a');
+  const link = screen.getByRole('link', { name: /Get started/ });
   expect(link).toHaveAttribute('href', '#demo');
 });
 

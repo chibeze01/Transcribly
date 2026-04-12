@@ -1,5 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import MockTerminal, { FULL_CMD, TYPING_SPEED } from '../MockTerminal';
 
 const AFTER_TYPING = 600 + FULL_CMD.length * TYPING_SPEED + 50;
@@ -68,6 +67,6 @@ it('renders the replay button', () => {
 it('resets animation when replay is clicked', () => {
   render(<MockTerminal />);
   act(() => jest.advanceTimersByTime(30000));
-  act(() => { userEvent.click(screen.getByText(/replay/)); });
+  fireEvent.click(screen.getByText(/replay/));
   expect(screen.queryByText(/Never Gonna Give You Up/)).not.toBeInTheDocument();
 });
