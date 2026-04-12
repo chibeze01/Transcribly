@@ -31,6 +31,10 @@
   },
   "jest": {
     "testMatch": ["**/bin/**/*.test.js"],
-    "modulePathIgnorePatterns": ["<rootDir>/cli/", "<rootDir>/client/"]
+    "modulePathIgnorePatterns": ["<rootDir>/cli/", "<rootDir>/client/"],
+    "collectCoverageFrom": ["bin/cli.js"],
+    "coverageThreshold": {
+      "global": { "lines": 80, "functions": 80, "branches": 80, "statements": 80 }
+    }
   }
 }
