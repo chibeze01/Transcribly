@@ -1,14 +1,7 @@
-import "./App.css";
-import ChatInterface from "./components/chat/ChatInterface";
-import Header from "./components/Header";
+import Landing from './pages/Landing';
 
 function App() {
-  return (
-    <div className="App">
-      <Header />
-      <ChatInterface className="ChatInterface" />
-    </div>
-  );
+  return <Landing />;
 }
 
 export default App;

@@ -1,50 +1,197 @@
-# 📺 YouTube Video Transcriber
+# Transcribly — YouTube transcripts from the terminal
 
-This Python application uses the OpenAI Whisper API to transcribe the audio from a YouTube video. 🎙️
+A CLI tool that transcribes YouTube videos and local audio/video files using the OpenAI Whisper API.
 
-## Requirements
+## Quick start
 
-- Python 3.8 or higher
-- OpenAI API credentials stored in the OpenAI Secret Manager
+```bash
+npx transcribly https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
 
-## Installation
+That's it. The transcript prints to your terminal and saves to `./text/`.
 
-1. Clone this repository and navigate to the project directory: `git clone https://github.com/your-username/your-repository.git && cd your-repository`
+## Prerequisites
 
-2. Install the required dependencies: `pip install -r requirements.txt`
+Transcribly requires the following system dependencies. Run `transcribly --doctor` to verify everything is set up correctly.
 
-## Setup API KEY 🔑
+### Node.js 18+
 
-To set up the API key, use the `.env.template` file and set your API key: `OPENAI_API_KEY = YOUR_API_KEY`
+Download from [nodejs.org](https://nodejs.org/) or install via a package manager:
 
-Then rename the `.env.template` to `.env`
+```bash
+# macOS (Homebrew)
+brew install node
+
+# Linux (Debian/Ubuntu)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Windows (winget)
+winget install OpenJS.NodeJS.LTS
+```
+
+### FFmpeg
+
+Required for audio processing. Must be available in your `PATH`.
+
+```bash
+# macOS (Homebrew)
+brew install ffmpeg
+
+# Linux (Debian/Ubuntu)
+sudo apt install ffmpeg
+
+# Linux (Fedora)
+sudo dnf install ffmpeg
+
+# Windows (Chocolatey)
+choco install ffmpeg
+
+# Windows (winget)
+winget install ffmpeg
+```
+
+### Python 3.8+
+
+Required by `yt-dlp` for YouTube audio downloads.
+
+```bash
+# macOS (Homebrew)
+brew install python3
+
+# Linux (Debian/Ubuntu)
+sudo apt install python3
+
+# Linux (Fedora)
+sudo dnf install python3
+
+# Windows
+# Download from https://www.python.org/downloads/
+# Or use winget:
+winget install Python.Python.3
+```
+
+### OpenAI API key
+
+Required for transcription via the Whisper API. Get your key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
+
+## API key setup
+
+Set your API key as an environment variable:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+```
+
+Or pass it directly:
+
+```bash
+npx transcribly <youtube-url> --api-key sk-...
+```
+
+You can also create a `.env` file in your working directory:
+
+```
+OPENAI_API_KEY=sk-...
+```
 
 ## Usage
 
-To transcribe a YouTube video, run the `main.py` script and provide the URL of the video as a command-line argument: `python main.py https://www.youtube.com/watch?v=VIDEO_ID`
+### Transcribe a YouTube video
 
-Make sure to replace `VIDEO_ID` with the actual ID of the YouTube video you want to transcribe.
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID
+```
 
-The transcript will be printed to the console in the form. 📜
+### Transcribe a local audio or video file
+
+```bash
+npx transcribly file ./interview.mp3
+```
+
+### Pipe output to a file
+
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID > transcript.txt
+```
+
+### Pipe to another tool
+
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | claude "Summarise this"
+```
+
+### Save as JSON
+
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID --format json
+```
+
+### Explicit subcommands
+
+```bash
+# YouTube URL
+transcribly url https://www.youtube.com/watch?v=VIDEO_ID
+
+# Local file
+transcribly file ./path/to/audio.mp3
+```
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-o, --output <dir>` | Output directory for transcript files | `./text` |
+| `-f, --format <format>` | Output format: `txt` or `json` | `txt` |
+| `-k, --api-key <key>` | OpenAI API key (overrides `OPENAI_API_KEY` env var) | -- |
+| `--doctor` | Check all system dependencies and report status | -- |
+| `--setup` | Set up OpenAI API key interactively | -- |
+
+## Output format
+
+**Text (default)** — plain transcript text, saved to `./text/<video-id>.txt`.
+
+**JSON** — structured output, saved to `./text/<video-id>.json`:
 
 ```json
 {
-  "video_is": "video ID",
-  "audio_file": "Audio file loaction",
-  "transcript": "transcript text",
-  "url": "url"
+  "audioFile": "/path/to/downloaded/audio.mp3",
+  "transcript": "The full transcript text..."
 }
 ```
 
-## Docker 🐳
+## Supported audio formats
 
-You can also run this application using Docker. To build a Docker image, run the following command in the project directory: `docker build -t my_image .`
+mp3, mp4, wav, webm, m4a, ogg, flac, mpeg, mpga
 
-Make sure to replace `my_image` with a suitable name for your Docker image.
+Large files (>24 MB) are automatically split into chunks before transcription.
 
-To run a Docker container and transcribe a YouTube video, use the following command: `docker run my_image https://www.youtube.com/watch?v=VIDEO_ID`
+## Global install
 
-Make sure to replace `my_image` with the name of your Docker image and `VIDEO_ID` with the actual ID of the YouTube video you want to transcribe.
+```bash
+npm install -g transcribly
+transcribly https://www.youtube.com/watch?v=VIDEO_ID
+```
 
-The transcript will be printed to the console. 🖨️
+## Programmatic usage
 
+```js
+const { transcribe } = require("transcribly/dist/transcriber");
+
+(async () => {
+  const result = await transcribe("./audio.mp3", process.env.OPENAI_API_KEY);
+  console.log(result.transcript);
+})();
+```
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b my-feature`)
+3. Commit your changes (`git commit -m "Add my feature"`)
+4. Push to the branch (`git push origin my-feature`)
+5. Open a pull request
+
+## License
+
+[MIT](LICENSE.md)
