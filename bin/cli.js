@@ -10,6 +10,13 @@ const { Command } = require('commander');
 // Load .env from current working directory
 require('dotenv').config();
 
+// ── Dependency injection (allows tests to mock ESM-only packages) ──
+
+const _deps = {
+  async getYtDlp() { const m = await import('yt-dlp-exec'); return m.default || m; },
+  async getOpenAI() { const m = await import('openai'); return m.default; },
+};
+
 // ── Helpers (exported for testing) ──
 
 function isYouTubeUrl(url) {
@@ -36,8 +43,7 @@ function resolveApiKey(opts) {
 async function downloadAudio(url, tmpDir, verbose) {
   if (verbose) process.stderr.write('Downloading audio from YouTube...\n');
 
-  const ytDlpModule = await import('yt-dlp-exec');
-  const ytDlp = ytDlpModule.default || ytDlpModule;
+  const ytDlp = await _deps.getYtDlp();
 
   const info = await ytDlp(url, {
     dumpSingleJson: true,
@@ -119,7 +125,7 @@ async function splitAudio(filePath, verbose) {
 }
 
 async function transcribeAudio(filePath, apiKey, verbose) {
-  const OpenAI = (await import('openai')).default;
+  const OpenAI = await _deps.getOpenAI();
   const client = new OpenAI({ apiKey });
   const chunks = await splitAudio(filePath, verbose);
 
@@ -156,6 +162,46 @@ async function transcribeAudio(filePath, apiKey, verbose) {
 const pkg = require('../package.json');
 const program = new Command();
 
+async function run(url, opts) {
+  // Validate URL
+  if (!isYouTubeUrl(url)) {
+    process.stderr.write(`Error: Invalid YouTube URL: ${url}\n`);
+    process.exit(1);
+  }
+
+  // Resolve API key
+  const apiKey = resolveApiKey(opts);
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'transcribly-'));
+
+  try {
+    const download = await downloadAudio(url, tmpDir, opts.verbose);
+    const transcript = await transcribeAudio(download.filePath, apiKey, opts.verbose);
+
+    const wordCount = transcript.split(/\s+/).filter(Boolean).length;
+
+    // Metadata to stderr (won't pollute piped output)
+    process.stderr.write(`Title: ${download.title}\n`);
+    process.stderr.write(`Duration: ${download.duration}s\n`);
+    process.stderr.write(`Words: ${wordCount}\n`);
+
+    if (opts.json) {
+      const output = JSON.stringify({
+        videoId: download.videoId,
+        title: download.title,
+        duration: download.duration,
+        wordCount,
+        transcript,
+      }, null, 2);
+      process.stdout.write(output + '\n');
+    } else {
+      process.stdout.write(transcript + '\n');
+    }
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
 program
   .name('transcribly')
   .description('Transcribe YouTube videos using OpenAI Whisper API')
@@ -164,48 +210,10 @@ program
   .option('--json', 'Output as JSON instead of plain text')
   .option('--verbose', 'Show progress to stderr')
   .option('--api-key <key>', 'OpenAI API key (or set OPENAI_API_KEY)')
-  .action(async (url, opts) => {
-    // Validate URL
-    if (!isYouTubeUrl(url)) {
-      process.stderr.write(`Error: Invalid YouTube URL: ${url}\n`);
-      process.exit(1);
-    }
-
-    // Resolve API key
-    const apiKey = resolveApiKey(opts);
-
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'transcribly-'));
-
-    try {
-      const download = await downloadAudio(url, tmpDir, opts.verbose);
-      const transcript = await transcribeAudio(download.filePath, apiKey, opts.verbose);
-
-      const wordCount = transcript.split(/\s+/).filter(Boolean).length;
-
-      // Metadata to stderr (won't pollute piped output)
-      process.stderr.write(`Title: ${download.title}\n`);
-      process.stderr.write(`Duration: ${download.duration}s\n`);
-      process.stderr.write(`Words: ${wordCount}\n`);
-
-      if (opts.json) {
-        const output = JSON.stringify({
-          videoId: download.videoId,
-          title: download.title,
-          duration: download.duration,
-          wordCount,
-          transcript,
-        }, null, 2);
-        process.stdout.write(output + '\n');
-      } else {
-        process.stdout.write(transcript + '\n');
-      }
-    } finally {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-    }
-  });
+  .action(run);
 
 // Export for testing
-module.exports = { isYouTubeUrl };
+module.exports = { isYouTubeUrl, resolveApiKey, run, _deps };
 
 // Only run CLI when executed directly (not when required by tests)
 if (require.main === module) {
