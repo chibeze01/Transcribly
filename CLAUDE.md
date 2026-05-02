@@ -81,3 +81,8 @@ You don't need to poll or wait. The system re-invokes you for the appropriate ne
 - Only work inside your own worktree.
 - Never touch master or other branches.
 - On unrecoverable error: set Status = "failed", describe reason in journal.
+
+## Git commit conventions
+- Do NOT add `Co-Authored-By: Claude ...` trailers to commit messages.
+- Do NOT add "🤖 Generated with Claude Code" or similar attribution footers to commits or PR bodies.
+- Write commit messages as if a human authored them.
