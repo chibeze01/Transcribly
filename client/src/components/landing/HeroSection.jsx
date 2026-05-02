@@ -104,9 +104,9 @@ export default function HeroSection() {
           transition={{ duration: 0.7, delay: 0.4 }}
           className="mx-auto mb-6 max-w-3xl"
         >
-          <h1 className="text-left text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-            <span className="block sm:whitespace-nowrap">Transcribe anything.</span>
-            <span className="block min-h-[1.15em] text-green-400">
+          <h1 className="text-left text-[clamp(1.25rem,6.5vw,1.875rem)] font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+            <span className="block whitespace-nowrap">Transcribe anything.</span>
+            <span className="block min-h-[1.15em] whitespace-nowrap text-green-400">
               {typedText || "\u00A0"}
             </span>
           </h1>
