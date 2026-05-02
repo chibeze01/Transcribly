@@ -104,16 +104,23 @@ function getApiKey(options: CommandOptions): string {
   if (process.env.OPENAI_API_KEY) return process.env.OPENAI_API_KEY;
 
   // No key found — show helpful error
+  console.error(chalk.red("\nError: No OpenAI API key found.\n"));
   console.error(
-    chalk.red("Error: OpenAI API key required for transcription.\n")
+    chalk.white("Transcribly uses the OpenAI Whisper API to transcribe audio.")
   );
-  console.error("Set it up in one of these ways:");
-  console.error("  1. Run: transcribly --setup");
-  console.error('  2. Set env var: export OPENAI_API_KEY="sk-..."');
-  console.error("  3. Add to .env file: OPENAI_API_KEY=sk-...");
   console.error(
-    "\nGet your API key at: https://platform.openai.com/api-keys"
+    chalk.white("You'll need a free API key from OpenAI to get started.\n")
   );
+  console.error(
+    chalk.cyan("  Get your API key → https://platform.openai.com/api-keys\n")
+  );
+  console.error(chalk.white("Once you have a key, set it up in one of these ways:\n"));
+  console.error(chalk.green("  Option 1 (recommended) — interactive setup:"));
+  console.error("    transcribly --setup\n");
+  console.error(chalk.green("  Option 2 — environment variable:"));
+  console.error('    export OPENAI_API_KEY="sk-..."\n');
+  console.error(chalk.green("  Option 3 — .env file in your working directory:"));
+  console.error("    OPENAI_API_KEY=sk-...\n");
   process.exit(1);
 }
 
