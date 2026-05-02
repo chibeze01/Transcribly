@@ -126,7 +126,8 @@ export async function runDoctor(): Promise<void> {
     console.log(chalk.green("  ✓ OpenAI API key configured"));
   } else {
     console.log(chalk.red("  ✗ OpenAI API key not configured"));
-    console.log(chalk.yellow("    Run: transcribly --setup"));
+    console.log(chalk.yellow("    Get a key → https://platform.openai.com/api-keys"));
+    console.log(chalk.yellow("    Then run:  transcribly --setup"));
     allPassed = false;
   }
 
