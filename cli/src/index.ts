@@ -27,12 +27,13 @@ program
   .description(
     "Transcribe YouTube videos and local audio/video files using OpenAI Whisper API"
   )
-  .version("1.0.0");
+  .version("1.0.3");
 
 program
   .command("url <youtube-url>")
   .description("Transcribe a YouTube video")
   .option("-o, --output <dir>", "Output directory", "./text")
+  .option("--out-file <path>", "Write transcript to a specific file (overrides --output)")
   .option("-f, --format <format>", "Output format (txt or json)", "txt")
   .option("-k, --api-key <key>", "OpenAI API key")
   .action(async (url: string, options) => {
@@ -43,6 +44,7 @@ program
   .command("file <path>")
   .description("Transcribe a local audio/video file")
   .option("-o, --output <dir>", "Output directory", "./text")
+  .option("--out-file <path>", "Write transcript to a specific file (overrides --output)")
   .option("-f, --format <format>", "Output format (txt or json)", "txt")
   .option("-k, --api-key <key>", "OpenAI API key")
   .action(async (filePath: string, options) => {
@@ -53,6 +55,7 @@ program
 program
   .argument("[input]", "YouTube URL or local file path")
   .option("-o, --output <dir>", "Output directory", "./text")
+  .option("--out-file <path>", "Write transcript to a specific file (overrides --output)")
   .option("-f, --format <format>", "Output format (txt or json)", "txt")
   .option("-k, --api-key <key>", "OpenAI API key")
   .option("--setup", "Set up OpenAI API key interactively")
@@ -79,6 +82,7 @@ program
 
 interface CommandOptions {
   output: string;
+  outFile?: string;
   format: string;
   apiKey?: string;
 }
@@ -297,8 +301,17 @@ function saveOutput(
   options: CommandOptions
 ): void {
   const format = options.format as "txt" | "json";
-  ensureOutputDir(options.output);
-  const outputPath = getOutputFilePath(options.output, baseName, format);
+
+  let outputPath: string;
+  if (options.outFile) {
+    // Explicit file path — use it directly and ensure its parent dir exists
+    outputPath = path.resolve(options.outFile);
+    const parentDir = path.dirname(outputPath);
+    ensureOutputDir(parentDir);
+  } else {
+    ensureOutputDir(options.output);
+    outputPath = getOutputFilePath(options.output, baseName, format);
+  }
 
   if (format === "json") {
     const jsonOutput = {
