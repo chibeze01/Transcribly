@@ -62,11 +62,30 @@ npx transcribly https://www.youtube.com/watch?v=VIDEO_ID
 npx transcribly file ./interview.mp3
 ```
 
-### Pipe to another tool
+### Use the transcript with an AI agent
+
+Each agent CLI handles piped stdin a little differently. Use whichever pattern matches your tool — they all end with the agent processing the transcript.
+
+**Codex** — pipe directly, stdin becomes the prompt:
 
 ```bash
-npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | claude "Summarise this"
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | codex exec --skip-git-repo-check
 ```
+
+**GitHub Copilot CLI** — pipe directly without a `-p` flag:
+
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | copilot
+```
+
+**Claude** — Claude's CLI bails on slow stdin (3-second timeout), so write the transcript to a file first, then feed it in:
+
+```bash
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID > /tmp/t.txt && \
+  claude -p "Summarise this" < /tmp/t.txt
+```
+
+The file-based pattern also works as a universal fallback for any agent or downstream tool (grep, jq, your own scripts, etc.).
 
 ### Save as JSON
 
