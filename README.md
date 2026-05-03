@@ -161,6 +161,7 @@ transcribly file ./path/to/audio.mp3
 | Option | Description | Default |
 |--------|-------------|---------|
 | `-o, --output <dir>` | Output directory for transcript files | `./text` |
+| `--out-file <path>` | Write transcript to a specific file (overrides `--output`) | -- |
 | `-f, --format <format>` | Output format: `txt` or `json` | `txt` |
 | `-k, --api-key <key>` | OpenAI API key (overrides `OPENAI_API_KEY` env var) | -- |
 | `--doctor` | Check all system dependencies and report status | -- |
