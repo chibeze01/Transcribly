@@ -131,10 +131,10 @@ npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | codex exec --skip-git
 npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | copilot
 ```
 
-**Claude** — Claude's CLI bails on slow stdin (3-second timeout), so write the transcript to a file first, then feed it in:
+**Claude** — Claude's CLI bails on slow stdin (3-second timeout), so write the transcript to a file first, then feed it in. Use the `--out-file` flag for a clean one-liner:
 
 ```bash
-npx transcribly https://www.youtube.com/watch?v=VIDEO_ID > /tmp/t.txt && \
+npx transcribly https://www.youtube.com/watch?v=VIDEO_ID --out-file /tmp/t.txt && \
   claude -p "Summarise this" < /tmp/t.txt
 ```
 
