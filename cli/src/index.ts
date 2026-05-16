@@ -7,6 +7,7 @@ import chalk from "chalk";
 import { config } from "dotenv";
 import { transcribe, TranscriptionResult } from "./transcriber";
 import { downloadYouTubeAudio, isYouTubeUrl } from "./youtube";
+import { downloadInstagramAudio, isInstagramUrl } from "./instagram";
 import {
   validateFilePath,
   createTempDir,
@@ -25,13 +26,13 @@ const program = new Command();
 program
   .name("transcribly")
   .description(
-    "Transcribe YouTube videos and local audio/video files using OpenAI Whisper API"
+    "Transcribe YouTube videos, Instagram reels, and local audio/video files using OpenAI Whisper API"
   )
   .version("1.0.3");
 
 program
-  .command("url <youtube-url>")
-  .description("Transcribe a YouTube video")
+  .command("url <url>")
+  .description("Transcribe a YouTube or Instagram video")
   .option("-o, --output <dir>", "Output directory", "./text")
   .option("--out-file <path>", "Write transcript to a specific file (overrides --output)")
   .option("-f, --format <format>", "Output format (txt or json)", "txt")
@@ -73,7 +74,7 @@ program
       program.help();
       return;
     }
-    if (isYouTubeUrl(input)) {
+    if (isYouTubeUrl(input) || isInstagramUrl(input)) {
       await handleTranscribeUrl(input, options);
     } else {
       await handleTranscribeFile(input, options);
@@ -229,8 +230,11 @@ async function handleTranscribeUrl(
 ): Promise<void> {
   const apiKey = getApiKey(options);
 
-  if (!isYouTubeUrl(url)) {
-    console.error(chalk.red("Error: Invalid YouTube URL."));
+  const isYT = isYouTubeUrl(url);
+  const isIG = isInstagramUrl(url);
+
+  if (!isYT && !isIG) {
+    console.error(chalk.red("Error: Invalid URL. Only YouTube and Instagram URLs are supported."));
     process.exit(1);
   }
 
@@ -257,7 +261,9 @@ async function handleTranscribeUrl(
   const tempDir = createTempDir();
 
   try {
-    const downloadResult = await downloadYouTubeAudio(url, tempDir);
+    const downloadResult = isYT
+      ? await downloadYouTubeAudio(url, tempDir)
+      : await downloadInstagramAudio(url, tempDir);
     const result = await transcribe(downloadResult.filePath, apiKey);
 
     console.log("\n" + chalk.green("--- Transcript ---"));
