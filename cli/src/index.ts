@@ -81,6 +81,8 @@ program
     }
   });
 
+const SUPPORTED_URL_PLATFORMS = ["YouTube", "Instagram"];
+
 interface CommandOptions {
   output: string;
   outFile?: string;
@@ -234,7 +236,7 @@ async function handleTranscribeUrl(
   const isIG = isInstagramUrl(url);
 
   if (!isYT && !isIG) {
-    console.error(chalk.red("Error: Invalid URL. Only YouTube and Instagram URLs are supported."));
+    console.error(chalk.red(`Error: Unsupported URL. Supported platforms: ${SUPPORTED_URL_PLATFORMS.join(", ")}.`));
     process.exit(1);
   }
 

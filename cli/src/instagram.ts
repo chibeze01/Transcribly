@@ -48,5 +48,5 @@ export async function downloadInstagramAudio(
 }
 
 export function isInstagramUrl(url: string): boolean {
-  return /^(https?:\/\/)?(www\.)?instagram\.com\/(p|reel|tv)\/.+/.test(url);
+  return /^(https?:\/\/)?(www\.)?instagram\.com\/(p|reels?|tv)\/.+/.test(url);
 }
