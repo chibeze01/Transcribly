@@ -1,32 +1,40 @@
 import { render, screen } from '@testing-library/react';
 import FeaturesSection from '../FeaturesSection';
+import { PackageManagerProvider } from '../../../context/PackageManagerContext';
+
+const renderFeatures = () =>
+  render(
+    <PackageManagerProvider>
+      <FeaturesSection />
+    </PackageManagerProvider>
+  );
 
 it('renders the section heading', () => {
-  render(<FeaturesSection />);
+  renderFeatures();
   expect(screen.getByText(/Built for developers/)).toBeInTheDocument();
 });
 
 it('renders Zero setup card', () => {
-  render(<FeaturesSection />);
+  renderFeatures();
   expect(screen.getByText('Zero setup')).toBeInTheDocument();
 });
 
 it('renders Any length video card', () => {
-  render(<FeaturesSection />);
+  renderFeatures();
   expect(screen.getByText('Any length video')).toBeInTheDocument();
 });
 
 it('renders Pipe-ready output card', () => {
-  render(<FeaturesSection />);
+  renderFeatures();
   expect(screen.getByText('Pipe-ready output')).toBeInTheDocument();
 });
 
 it('renders three feature cards', () => {
-  render(<FeaturesSection />);
+  renderFeatures();
   expect(screen.getAllByRole('article')).toHaveLength(3);
 });
 
 it('renders WHY TRANSCRIBLY label', () => {
-  render(<FeaturesSection />);
+  renderFeatures();
   expect(screen.getByText('WHY TRANSCRIBLY')).toBeInTheDocument();
 });
