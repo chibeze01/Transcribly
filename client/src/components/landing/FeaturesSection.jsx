@@ -1,31 +1,35 @@
 import { motion } from "framer-motion";
 import ScrollReveal from "./ScrollReveal";
-
-const FEATURES = [
-  {
-    icon: "⚡",
-    title: "Zero setup",
-    body: "No account. No config file. Just npx and a URL. Works anywhere Node runs.",
-    snippet: "$ npx transcribly <url>",
-    snippetGreen: null,
-  },
-  {
-    icon: "∞",
-    title: "Any length video",
-    body: "Audio is automatically chunked and transcribed in parallel. 3-minute clip or 3-hour lecture — same command.",
-    snippet: null,
-    snippetGreen: "✓ chunked · parallel · unlimited",
-  },
-  {
-    icon: "|",
-    title: "Pipe-ready output",
-    body: "Clean plain text to stdout. Pipe into Claude, GPT, a file, a script — whatever your workflow needs.",
-    snippet: "$ transcribly <url>",
-    snippetGreen: " | claude",
-  },
-];
+import { usePackageManager, getRunCmd } from "../../context/PackageManagerContext";
 
 export default function FeaturesSection() {
+  const { pm } = usePackageManager();
+  const runCmd = getRunCmd(pm);
+
+  const FEATURES = [
+    {
+      icon: "⚡",
+      title: "Zero setup",
+      body: `No account. No config file. Just ${runCmd} and a URL. Works anywhere ${pm === 'bun' ? 'Bun' : 'Node'} runs.`,
+      snippet: `$ ${runCmd} transcribly <url>`,
+      snippetGreen: null,
+    },
+    {
+      icon: "∞",
+      title: "Any length video",
+      body: "Audio is automatically chunked and transcribed in parallel. 3-minute clip or 3-hour lecture — same command.",
+      snippet: null,
+      snippetGreen: "✓ chunked · parallel · unlimited",
+    },
+    {
+      icon: "|",
+      title: "Pipe-ready output",
+      body: "Clean plain text to stdout. Pipe into Claude, GPT, a file, a script — whatever your workflow needs.",
+      snippet: "$ transcribly <url>",
+      snippetGreen: " | claude",
+    },
+  ];
+
   return (
     <section className="border-t border-gray-800 bg-[#0a0a0a] px-6 py-24 font-mono">
       <div className="mx-auto max-w-5xl text-center">

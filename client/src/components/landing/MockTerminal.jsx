@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { usePackageManager, getRunCmd } from '../../context/PackageManagerContext';
 
-export const FULL_CMD = 'npx transcribly https://youtube.com/watch?v=dQw4w9WgXcQ';
 export const TYPING_SPEED = 36;
 
 const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
@@ -21,6 +21,11 @@ export default function MockTerminal() {
   const [showResult, setShowResult] = useState(false);
   const [showPipe, setShowPipe] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+
+  const { pm } = usePackageManager();
+  const runCmd = getRunCmd(pm);
+  const fullCmdRef = useRef('');
+  fullCmdRef.current = `${runCmd} transcribly https://youtube.com/watch?v=dQw4w9WgXcQ`;
 
   const timers = useRef([]);
 
@@ -60,16 +65,14 @@ export default function MockTerminal() {
     setShowPipe(false);
     setShowPrompt(false);
 
-    // Phase 1: initial delay then start typing
     addTimeout(() => {
       let count = 0;
       const typingId = addInterval(() => {
         count += 1;
         setTypedCount(count);
-        if (count >= FULL_CMD.length) {
+        if (count >= fullCmdRef.current.length) {
           removeTimer(typingId);
 
-          // Small pause after typing before fetching phase
           addTimeout(() => {
             setPhase('fetching');
             let frame = 0;
@@ -78,7 +81,6 @@ export default function MockTerminal() {
               setSpinnerFrame(frame);
             }, SPINNER_INTERVAL);
 
-            // Fetching lasts 1400ms then chunking
             addTimeout(() => {
               removeTimer(spinFetch);
               setPhase('chunking');
@@ -88,7 +90,6 @@ export default function MockTerminal() {
                 setSpinnerFrame(frame2);
               }, SPINNER_INTERVAL);
 
-              // Chunking lasts 1200ms then transcribing
               addTimeout(() => {
                 removeTimer(spinChunk);
                 setPhase('transcribing');
@@ -106,19 +107,15 @@ export default function MockTerminal() {
                     removeTimer(progressId);
                     removeTimer(spinTranscribe);
 
-                    // Done phase
                     addTimeout(() => {
                       setPhase('done');
 
-                      // Show result block after brief pause
                       addTimeout(() => {
                         setShowResult(true);
 
-                        // Show pipe hint
                         addTimeout(() => {
                           setShowPipe(true);
 
-                          // Show final prompt
                           addTimeout(() => {
                             setShowPrompt(true);
                             setPhase('prompt');
@@ -136,7 +133,6 @@ export default function MockTerminal() {
     }, 600);
   }, [clearAllTimers, addTimeout, addInterval, removeTimer]);
 
-  // Restart animation when section scrolls into view
   const sectionRef = useRef(null);
 
   useEffect(() => {
@@ -161,7 +157,12 @@ export default function MockTerminal() {
     };
   }, [runDemo, clearAllTimers]);
 
-  const typedCmd = FULL_CMD.slice(0, typedCount);
+  // Restart demo when package manager changes
+  useEffect(() => {
+    runDemo();
+  }, [pm]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const typedCmd = fullCmdRef.current.slice(0, typedCount);
   const isTypingPhase = phase === 'typing';
   const spinnerChar = SPINNER_FRAMES[spinnerFrame];
 
@@ -200,7 +201,6 @@ export default function MockTerminal() {
 
           {/* Terminal body */}
           <div className="min-h-[320px] p-5 font-mono text-sm leading-relaxed">
-            {/* Command line — visible once typing starts */}
             {typedCount > 0 && (
               <div className="text-green-400">
                 <span className="text-gray-500">❯ </span>
@@ -211,7 +211,6 @@ export default function MockTerminal() {
               </div>
             )}
 
-            {/* Single status line — updates in place */}
             {(phase === 'fetching' || phase === 'chunking') && (
               <div className="mt-1">
                 <span className="text-yellow-400">{spinnerChar} </span>
@@ -241,7 +240,6 @@ export default function MockTerminal() {
               </div>
             )}
 
-            {/* Result block */}
             {showResult && (
               <div className="mt-3 text-gray-400">
                 <div className="text-gray-600">───────────────────────────────────────────</div>
@@ -266,19 +264,17 @@ export default function MockTerminal() {
               </div>
             )}
 
-            {/* Pipe hint */}
             {showPipe && (
               <div className="mt-4">
                 <div className="text-gray-300">
                   <span className="text-gray-500">❯ </span>
-                  npx transcribly https://...{' '}
+                  {runCmd} transcribly https://...{' '}
                   <span className="text-yellow-400">| claude &quot;summarize this&quot;</span>
                 </div>
                 <div className="mt-1 text-xs text-gray-500">↑ pipe it anywhere</div>
               </div>
             )}
 
-            {/* Bottom prompt cursor */}
             {showPrompt && (
               <div className="mt-3 text-green-400">
                 <span className="text-gray-500">❯ </span>

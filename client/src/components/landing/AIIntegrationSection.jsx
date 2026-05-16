@@ -1,7 +1,11 @@
 import { motion } from "framer-motion";
 import ScrollReveal from "./ScrollReveal";
+import { usePackageManager, getRunCmd } from "../../context/PackageManagerContext";
 
 export default function AIIntegrationSection() {
+  const { pm } = usePackageManager();
+  const runCmd = getRunCmd(pm);
+
   return (
     <section className="border-t border-gray-800 bg-[#0a0a0a] px-6 py-24 font-mono">
       <div className="mx-auto max-w-5xl text-center">
@@ -77,7 +81,7 @@ export default function AIIntegrationSection() {
                   {"    "}
                   <span className="text-green-400">"cmd"</span>
                   <span className="text-gray-600">: </span>
-                  <span className="text-white">"npx transcribly $url"</span>
+                  <span className="text-white">"{runCmd} transcribly $url"</span>
                   {"\n"}
                   {"  "}
                   <span className="text-gray-600">{"}]"}</span>
@@ -132,7 +136,7 @@ export default function AIIntegrationSection() {
                 <pre className="text-[11px] leading-loose">
                   <span className="text-gray-600"># fetch + summarize</span>
                   {"\n"}
-                  <span className="text-white">npx transcribly $URL \</span>
+                  <span className="text-white">{runCmd} transcribly $URL \</span>
                   {"\n"}
                   {"  "}
                   <span className="text-white">| llm </span>
@@ -140,7 +144,7 @@ export default function AIIntegrationSection() {
                   {"\n\n"}
                   <span className="text-gray-600"># ingest into RAG</span>
                   {"\n"}
-                  <span className="text-white">npx transcribly $URL \</span>
+                  <span className="text-white">{runCmd} transcribly $URL \</span>
                   {"\n"}
                   {"  "}
                   <span className="text-white">| chunk </span>

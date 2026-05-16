@@ -1,7 +1,12 @@
 import Landing from './pages/Landing';
+import { PackageManagerProvider } from './context/PackageManagerContext';
 
 function App() {
-  return <Landing />;
+  return (
+    <PackageManagerProvider>
+      <Landing />
+    </PackageManagerProvider>
+  );
 }
 
 export default App;

@@ -4,13 +4,15 @@ Transcribe YouTube videos and local audio/video files from your terminal using t
 
 ```bash
 npx transcribly https://www.youtube.com/watch?v=VIDEO_ID
+# or with Bun (faster startup)
+bunx transcribly https://www.youtube.com/watch?v=VIDEO_ID
 ```
 
 Transcript prints to your terminal and saves to `./text/`.
 
 ## Prerequisites
 
-- **Node.js 18+**
+- **Node.js 18+** or **Bun 1.0+**
 - **FFmpeg** — must be available in your `PATH`
 - **Python 3.8+** — required by `yt-dlp` for YouTube downloads
 - **OpenAI API key** — get one at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
@@ -53,13 +55,18 @@ Run `transcribly --setup` for an interactive setup prompt.
 ### Transcribe a YouTube video
 
 ```bash
+# npm / npx
 npx transcribly https://www.youtube.com/watch?v=VIDEO_ID
+
+# Bun (faster cold-start)
+bunx transcribly https://www.youtube.com/watch?v=VIDEO_ID
 ```
 
 ### Transcribe a local file
 
 ```bash
 npx transcribly file ./interview.mp3
+bunx transcribly file ./interview.mp3
 ```
 
 ### Use the transcript with an AI agent
@@ -70,18 +77,24 @@ Each agent CLI handles piped stdin a little differently. Use whichever pattern m
 
 ```bash
 npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | codex exec --skip-git-repo-check
+bunx transcribly https://www.youtube.com/watch?v=VIDEO_ID | codex exec --skip-git-repo-check
 ```
 
 **GitHub Copilot CLI** — pipe directly without a `-p` flag:
 
 ```bash
 npx transcribly https://www.youtube.com/watch?v=VIDEO_ID | copilot
+bunx transcribly https://www.youtube.com/watch?v=VIDEO_ID | copilot
 ```
 
 **Claude** — Claude's CLI bails on slow stdin (3-second timeout), so write the transcript to a file first, then feed it in. Use the `--out-file` flag for a clean one-liner:
 
 ```bash
 npx transcribly https://www.youtube.com/watch?v=VIDEO_ID --out-file /tmp/t.txt && \
+  claude -p "Summarise this" < /tmp/t.txt
+
+# Bun
+bunx transcribly https://www.youtube.com/watch?v=VIDEO_ID --out-file /tmp/t.txt && \
   claude -p "Summarise this" < /tmp/t.txt
 ```
 
@@ -132,7 +145,12 @@ Files larger than 24 MB are automatically split into chunks before transcription
 ## Global Install
 
 ```bash
+# npm
 npm install -g transcribly
+transcribly https://www.youtube.com/watch?v=VIDEO_ID
+
+# Bun
+bun add -g transcribly
 transcribly https://www.youtube.com/watch?v=VIDEO_ID
 ```
 
