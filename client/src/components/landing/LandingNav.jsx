@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePackageManager, getInstallCmd } from "../../context/PackageManagerContext";
 
 export default function LandingNav() {
   const [copied, setCopied] = useState(false);
   const { pm, setPm } = usePackageManager();
   const installCmd = getInstallCmd(pm);
+
+  useEffect(() => {
+    setCopied(false);
+  }, [pm]);
 
   const handleCopy = () => {
     navigator.clipboard

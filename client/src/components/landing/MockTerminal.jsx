@@ -24,8 +24,12 @@ export default function MockTerminal() {
 
   const { pm } = usePackageManager();
   const runCmd = getRunCmd(pm);
-  const fullCmdRef = useRef('');
-  fullCmdRef.current = `${runCmd} transcribly https://youtube.com/watch?v=dQw4w9WgXcQ`;
+  const fullCmd = `${runCmd} transcribly https://youtube.com/watch?v=dQw4w9WgXcQ`;
+  const fullCmdRef = useRef(fullCmd);
+
+  useEffect(() => {
+    fullCmdRef.current = fullCmd;
+  }, [fullCmd]);
 
   const timers = useRef([]);
 
@@ -160,9 +164,9 @@ export default function MockTerminal() {
   // Restart demo when package manager changes
   useEffect(() => {
     runDemo();
-  }, [pm]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pm, runDemo]);
 
-  const typedCmd = fullCmdRef.current.slice(0, typedCount);
+  const typedCmd = fullCmd.slice(0, typedCount);
   const isTypingPhase = phase === 'typing';
   const spinnerChar = SPINNER_FRAMES[spinnerFrame];
 

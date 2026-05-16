@@ -12,7 +12,11 @@ export function PackageManagerProvider({ children }) {
 }
 
 export function usePackageManager() {
-  return useContext(PackageManagerContext);
+  const ctx = useContext(PackageManagerContext);
+  if (!ctx) {
+    throw new Error('usePackageManager must be used inside <PackageManagerProvider>');
+  }
+  return ctx;
 }
 
 export function getRunCmd(pm) {

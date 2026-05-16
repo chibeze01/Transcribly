@@ -10,7 +10,7 @@ export default function FeaturesSection() {
     {
       icon: "⚡",
       title: "Zero setup",
-      body: `No account. No config file. Just ${runCmd} and a URL. Works anywhere ${pm === 'bun' ? 'Bun' : 'Node'} runs.`,
+      body: `No account. No config file. Just ${runCmd} and a URL. Works on Node and Bun.`,
       snippet: `$ ${runCmd} transcribly <url>`,
       snippetGreen: null,
     },
