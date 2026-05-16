@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import WaveformScene from "./WaveformScene";
+import { usePackageManager, getRunCmd } from "../../context/PackageManagerContext";
 
 const PHRASES = [
   "In your terminal.",
@@ -61,10 +62,12 @@ function useTypingAnimation(phrases) {
 export default function HeroSection() {
   const [copied, setCopied] = useState(false);
   const typedText = useTypingAnimation(PHRASES);
+  const { pm, setPm } = usePackageManager();
+  const command = `${getRunCmd(pm)} transcribly <youtube-url>`;
 
   const handleCopy = () => {
     navigator.clipboard
-      .writeText("npx transcribly <youtube-url>")
+      .writeText(command)
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -107,7 +110,7 @@ export default function HeroSection() {
           <h1 className="text-left text-[clamp(1.25rem,6.5vw,1.875rem)] font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
             <span className="block whitespace-nowrap">Transcribe anything.</span>
             <span className="block min-h-[1.15em] whitespace-nowrap text-green-400">
-              {typedText || "\u00A0"}
+              {typedText || " "}
             </span>
           </h1>
         </motion.div>
@@ -123,26 +126,43 @@ export default function HeroSection() {
           Pipe the output anywhere — your AI agent, your codebase, your notes.
         </motion.p>
 
-        {/* Command block */}
+        {/* Command block with package manager tabs */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.8 }}
-          className="mx-auto mt-8 flex max-w-lg items-center justify-between rounded-lg border border-gray-800 bg-gray-900/80 px-4 py-3 backdrop-blur-sm"
+          className="mx-auto mt-8 max-w-lg"
         >
-          <code className="font-mono text-sm text-gray-300">
-            $ npx transcribly &lt;youtube-url&gt;
-          </code>
-          <button
-            onClick={handleCopy}
-            className={`ml-4 rounded px-2 py-1 text-xs font-medium transition-colors ${
-              copied
-                ? "text-green-400"
-                : "text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            {copied ? "copied!" : "copy"}
-          </button>
+          <div className="flex">
+            {['npm', 'bun'].map((opt) => (
+              <button
+                key={opt}
+                onClick={() => setPm(opt)}
+                className={`relative -mb-px rounded-t-md border-x border-t px-4 py-1.5 font-mono text-xs transition-colors ${
+                  pm === opt
+                    ? 'border-gray-800 bg-gray-900/80 text-green-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center justify-between rounded-b-lg rounded-tr-lg border border-gray-800 bg-gray-900/80 px-4 py-3 backdrop-blur-sm">
+            <code className="font-mono text-sm text-gray-300">
+              $ {command}
+            </code>
+            <button
+              onClick={handleCopy}
+              className={`ml-4 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                copied
+                  ? "text-green-400"
+                  : "text-gray-500 hover:text-gray-300"
+              }`}
+            >
+              {copied ? "copied!" : "copy"}
+            </button>
+          </div>
         </motion.div>
 
         {/* CTAs */}

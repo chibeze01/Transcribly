@@ -1,9 +1,13 @@
 import { motion } from "framer-motion";
 import ScrollReveal from "./ScrollReveal";
+import { usePackageManager, getRunCmd } from "../../context/PackageManagerContext";
 
 const GITHUB_URL = "https://github.com/chibeze01/Youtube-Transcriber";
 
 export default function CTASection() {
+  const { pm, setPm } = usePackageManager();
+  const runCmd = getRunCmd(pm);
+
   return (
     <section className="relative overflow-hidden border-t border-gray-800 px-6 py-24 font-mono text-center">
       {/* Grid background */}
@@ -35,16 +39,33 @@ export default function CTASection() {
         </ScrollReveal>
 
         <ScrollReveal delay={0.15}>
-          <motion.div
-            whileHover={{ scale: 1.02, borderColor: "rgba(40,200,64,0.3)" }}
-            transition={{ duration: 0.2 }}
-            className="mx-auto mt-10 inline-flex items-center gap-4 rounded-lg border border-gray-800 bg-[#0f0f0f] px-6 py-4"
-          >
-            <span className="text-sm text-gray-500">$</span>
-            <span className="text-sm text-white">
-              npx transcribly &lt;youtube-url&gt;
-            </span>
-          </motion.div>
+          <div className="mx-auto mt-10 inline-flex flex-col items-start">
+            <div className="flex">
+              {['npm', 'bun'].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setPm(opt)}
+                  className={`relative -mb-px rounded-t-md border-x border-t px-4 py-1.5 font-mono text-xs transition-colors ${
+                    pm === opt
+                      ? 'border-gray-800 bg-[#0f0f0f] text-green-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <motion.div
+              whileHover={{ scale: 1.02, borderColor: "rgba(40,200,64,0.3)" }}
+              transition={{ duration: 0.2 }}
+              className="inline-flex items-center gap-4 rounded-b-lg rounded-tr-lg border border-gray-800 bg-[#0f0f0f] px-6 py-4"
+            >
+              <span className="text-sm text-gray-500">$</span>
+              <span className="text-sm text-white">
+                {runCmd} transcribly &lt;youtube-url&gt;
+              </span>
+            </motion.div>
+          </div>
         </ScrollReveal>
 
         <ScrollReveal delay={0.3}>
