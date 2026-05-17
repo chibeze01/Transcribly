@@ -79,7 +79,7 @@ export default function CTASection() {
               View on GitHub →
             </a>
             <a
-              href={`${GITHUB_URL}#readme`}
+              href="https://www.npmjs.com/package/transcribly"
               target="_blank"
               rel="noreferrer"
               className="rounded border border-gray-700 px-6 py-3 text-xs text-gray-500 transition-colors hover:text-white"

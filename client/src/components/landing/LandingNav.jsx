@@ -25,7 +25,7 @@ export default function LandingNav() {
       <span className="text-sm font-bold tracking-wider text-white">transcribly</span>
       <div className="flex items-center gap-4">
         <a
-          href="https://github.com/chibeze01/Youtube-Transcriber#readme"
+          href="https://www.npmjs.com/package/transcribly"
           target="_blank"
           rel="noreferrer"
           className="text-xs text-gray-500 transition-colors hover:text-white"
