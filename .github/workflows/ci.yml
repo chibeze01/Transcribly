@@ -34,7 +34,7 @@ jobs:
           cache-dependency-path: client/package-lock.json
       - run: npm install
         working-directory: client
-      - run: npm test -- --watchAll=false --ci
+      - run: npm test
         working-directory: client
 
   lint:

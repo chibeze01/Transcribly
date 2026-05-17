@@ -15,9 +15,11 @@
   "keywords": [
     "transcribe",
     "youtube",
+    "instagram",
     "whisper",
     "openai",
     "audio",
+    "video",
     "cli"
   ],
   "license": "MIT",

@@ -20,7 +20,7 @@ jobs:
           cache-dependency-path: client/package-lock.json
       - run: npm install
         working-directory: client
-      - run: npm test -- --watchAll=false --ci
+      - run: npm test
         working-directory: client
 
   build-and-deploy:
@@ -50,5 +50,5 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./client/build/
+          local-dir: ./client/dist/
           server-dir: /public_html/
