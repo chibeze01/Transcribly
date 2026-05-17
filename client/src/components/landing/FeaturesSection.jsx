@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import ScrollReveal from "./ScrollReveal";
 import { usePackageManager, getRunCmd } from "../../context/PackageManagerContext";
+import ConstellationBackground from "./ConstellationBackground";
 
 export default function FeaturesSection() {
   const { pm } = usePackageManager();
@@ -31,10 +32,17 @@ export default function FeaturesSection() {
   ];
 
   return (
-    <section className="border-t border-gray-800 bg-[#0a0a0a] px-6 py-24 font-mono">
-      <div className="mx-auto max-w-5xl text-center">
+    <section
+      className="relative overflow-hidden px-6 py-24 font-mono"
+      style={{
+        background:
+          "linear-gradient(to bottom, #000 0%, #0a0a0a 28%, #0a0a0a 70%, #000 100%)",
+      }}
+    >
+      <ConstellationBackground />
+      <div className="relative mx-auto max-w-5xl text-center">
         <ScrollReveal>
-          <span className="mb-4 inline-block rounded-full border border-gray-700 px-3 py-1 text-[10px] tracking-widest text-gray-500">
+          <span className="mb-4 inline-block rounded-full border border-gray-700 bg-[#0a0a0a]/80 px-3 py-1 text-[10px] tracking-widest text-gray-500 backdrop-blur">
             WHY TRANSCRIBLY
           </span>
           <h2 className="text-2xl font-bold text-white sm:text-3xl">
@@ -54,7 +62,7 @@ export default function FeaturesSection() {
                   y: -4,
                 }}
                 transition={{ duration: 0.25 }}
-                className="h-full rounded-xl border border-gray-800 bg-[#0f0f0f] p-7"
+                className="h-full rounded-xl border border-gray-800 bg-[#0f0f0f]/95 p-7 backdrop-blur-sm"
               >
                 <div className="mb-4 text-2xl text-green-400">{f.icon}</div>
                 <h3 className="mb-2 text-sm font-bold text-white">
