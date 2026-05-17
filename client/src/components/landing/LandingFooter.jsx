@@ -22,7 +22,7 @@ export default function LandingFooter() {
           npm
         </a>
         <a
-          href={`${GITHUB_URL}#readme`}
+          href="https://www.npmjs.com/package/transcribly"
           target="_blank"
           rel="noreferrer"
           className="text-[11px] text-gray-700 transition-colors hover:text-gray-400"

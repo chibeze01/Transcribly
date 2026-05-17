@@ -1,6 +1,6 @@
 # Transcribly
 
-Transcribe YouTube videos and local audio/video files from your terminal using the OpenAI Whisper API.
+Transcribe YouTube videos, Instagram reels, and local audio/video files from your terminal using the OpenAI Whisper API.
 
 ```bash
 npx transcribly https://www.youtube.com/watch?v=VIDEO_ID
@@ -60,6 +60,16 @@ npx transcribly https://www.youtube.com/watch?v=VIDEO_ID
 
 # Bun (faster cold-start)
 bunx transcribly https://www.youtube.com/watch?v=VIDEO_ID
+```
+
+### Transcribe an Instagram reel or video
+
+```bash
+# npm / npx
+npx transcribly https://www.instagram.com/reel/REEL_ID/
+
+# Bun (faster cold-start)
+bunx transcribly https://www.instagram.com/reel/REEL_ID/
 ```
 
 ### Transcribe a local file
@@ -169,6 +179,7 @@ const { transcribe } = require("transcribly/dist/transcriber");
 
 - Website: [transcribly.dev](https://transcribly.dev)
 - npm: [npmjs.com/package/transcribly](https://www.npmjs.com/package/transcribly)
+- GitHub: [github.com/chibeze01/Transcribly](https://github.com/chibeze01/Transcribly)
 
 ## License
 
