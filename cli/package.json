@@ -1,7 +1,7 @@
 {
   "name": "transcribly",
   "version": "1.1.1",
-  "description": "CLI tool to transcribe YouTube videos and local audio/video files using OpenAI Whisper API",
+  "description": "CLI tool to transcribe YouTube videos, Instagram reels, and local audio/video files using OpenAI Whisper API",
   "main": "dist/index.js",
   "bin": {
     "transcribly": "dist/index.js"
