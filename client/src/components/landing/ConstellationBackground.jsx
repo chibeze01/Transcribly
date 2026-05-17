@@ -27,6 +27,10 @@ export default function ConstellationBackground({
       canvas.height = h * dpr;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
+      for (const n of nodes) {
+        n.x = Math.min(n.x, w);
+        n.y = Math.min(n.y, h);
+      }
     };
     resize();
     const ro = new ResizeObserver(resize);

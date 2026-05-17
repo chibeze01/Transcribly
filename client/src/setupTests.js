@@ -22,20 +22,47 @@ class IntersectionObserver {
 }
 window.IntersectionObserver = IntersectionObserver;
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+window.ResizeObserver = ResizeObserver;
+
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 HTMLCanvasElement.prototype.getContext = function () {
   return {
     clearRect: () => {},
+    fillRect: () => {},
     beginPath: () => {},
     arc: () => {},
     fill: () => {},
+    stroke: () => {},
     moveTo: () => {},
     lineTo: () => {},
     quadraticCurveTo: () => {},
     closePath: () => {},
+    fillText: () => {},
+    setTransform: () => {},
+    scale: () => {},
     fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 0,
+    font: '',
     shadowBlur: 0,
     shadowColor: '',
-    scale: () => {},
     createLinearGradient: () => ({ addColorStop: () => {} }),
+    createRadialGradient: () => ({ addColorStop: () => {} }),
   };
 };
