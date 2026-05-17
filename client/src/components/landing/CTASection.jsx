@@ -9,15 +9,26 @@ export default function CTASection() {
   const runCmd = getRunCmd(pm);
 
   return (
-    <section className="relative overflow-hidden border-t border-gray-800 px-6 py-24 font-mono text-center">
-      {/* Grid background */}
+    <section
+      className="relative overflow-hidden px-6 py-24 font-mono text-center"
+      style={{
+        background:
+          "linear-gradient(to bottom, #000 0%, #0a0a0a 28%, #0a0a0a 100%)",
+      }}
+    >
+      {/* Grid background — masked so it fades in from the top */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-30"
+        className="pointer-events-none absolute inset-0"
         aria-hidden="true"
         style={{
           backgroundImage:
             "linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px)",
           backgroundSize: "40px 40px",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, #000 32%, #000 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, #000 32%, #000 100%)",
+          opacity: 0.35,
         }}
       />
       {/* Green glow */}
