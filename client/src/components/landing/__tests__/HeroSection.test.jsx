@@ -12,7 +12,7 @@ const renderHero = () =>
 
 beforeEach(() => {
   Object.defineProperty(navigator, 'clipboard', {
-    value: { writeText: jest.fn().mockResolvedValue(undefined) },
+    value: { writeText: vi.fn().mockResolvedValue(undefined) },
     writable: true,
   });
 });
@@ -42,13 +42,13 @@ it('renders all three stat labels', () => {
 
 it('copies command to clipboard on copy click', async () => {
   renderHero();
-  userEvent.click(screen.getByText('copy'));
+  await userEvent.click(screen.getByText('copy'));
   await screen.findByText('copied!');
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith('npx transcribly <youtube-url>');
 });
 
 it('shows "copied!" after clicking copy', async () => {
   renderHero();
-  userEvent.click(screen.getByText('copy'));
+  await userEvent.click(screen.getByText('copy'));
   expect(await screen.findByText('copied!')).toBeInTheDocument();
 });
