@@ -28,7 +28,7 @@ program
   .description(
     "Transcribe YouTube videos, Instagram reels, and local audio/video files using OpenAI Whisper API"
   )
-  .version("1.1.0");
+  .version("1.1.1");
 
 program
   .command("url <url>")
