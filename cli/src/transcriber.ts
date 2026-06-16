@@ -7,6 +7,8 @@ import { createSpinner, createTempDir } from "./utils";
 // Whisper API has a 25MB file size limit
 const MAX_CHUNK_SIZE_MB = 24;
 const CHUNK_DURATION_SECONDS = 180; // 3 minutes per chunk
+const CONCURRENCY = 4;
+const MAX_RETRIES = 3;
 
 export interface TranscriptionResult {
   transcript: string;
@@ -98,11 +100,51 @@ async function transcribeFile(
 ): Promise<string> {
   const fileStream = fs.createReadStream(filePath);
   const response = await client.audio.transcriptions.create({
-    model: "whisper-1",
+    model: "gpt-4o-mini-transcribe",
     file: fileStream,
     response_format: "text",
   });
   return response as unknown as string;
+}
+
+async function transcribeFileWithRetry(
+  client: OpenAI,
+  filePath: string
+): Promise<string> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await transcribeFile(client, filePath);
+    } catch (err: unknown) {
+      const status = (err as { status?: number })?.status;
+      const isRetryable = status === 429 || (status !== undefined && status >= 500);
+      if (!isRetryable || attempt === MAX_RETRIES) throw err;
+      await new Promise((res) => setTimeout(res, 2 ** attempt * 1000));
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
+async function transcribeChunks(
+  client: OpenAI,
+  chunks: string[],
+  onProgress: (done: number, total: number) => void
+): Promise<string[]> {
+  const results: string[] = new Array(chunks.length);
+  let nextIndex = 0;
+  let completed = 0;
+
+  async function worker() {
+    while (nextIndex < chunks.length) {
+      const i = nextIndex++;
+      results[i] = (await transcribeFileWithRetry(client, chunks[i])).trim();
+      onProgress(++completed, chunks.length);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, chunks.length) }, worker));
+  return results;
 }
 
 export async function transcribe(
@@ -113,20 +155,16 @@ export async function transcribe(
   const chunks = await splitAudio(filePath);
 
   const spinner = createSpinner(
-    `Transcribing${chunks.length > 1 ? ` ${chunks.length} chunks` : ""}...`
+    `Transcribing${chunks.length > 1 ? ` 0/${chunks.length} chunks` : ""}...`
   );
   spinner.start();
 
   try {
-    const transcripts: string[] = [];
-
-    for (let i = 0; i < chunks.length; i++) {
-      if (chunks.length > 1) {
-        spinner.text = `Transcribing chunk ${i + 1}/${chunks.length}...`;
+    const transcripts = await transcribeChunks(client, chunks, (done, total) => {
+      if (total > 1) {
+        spinner.text = `Transcribing ${done}/${total} chunks...`;
       }
-      const text = await transcribeFile(client, chunks[i]);
-      transcripts.push(text.trim());
-    }
+    });
 
     spinner.succeed("Transcription complete");
 
