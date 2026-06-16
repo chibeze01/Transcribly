@@ -111,7 +111,6 @@ async function transcribeFileWithRetry(
   client: OpenAI,
   filePath: string
 ): Promise<string> {
-  let lastError: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       return await transcribeFile(client, filePath);
@@ -119,11 +118,12 @@ async function transcribeFileWithRetry(
       const status = (err as { status?: number })?.status;
       const isRetryable = status === 429 || (status !== undefined && status >= 500);
       if (!isRetryable || attempt === MAX_RETRIES) throw err;
-      await new Promise((res) => setTimeout(res, 2 ** attempt * 1000));
-      lastError = err;
+      const jitter = 0.5 + Math.random() * 0.5;
+      await new Promise((res) => setTimeout(res, 2 ** attempt * 1000 * jitter));
     }
   }
-  throw lastError;
+  // TypeScript control flow — loop above always returns or throws
+  throw new Error("unreachable");
 }
 
 async function transcribeChunks(
