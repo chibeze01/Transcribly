@@ -9,6 +9,8 @@ const MAX_CHUNK_SIZE_MB = 24;
 const CHUNK_DURATION_SECONDS = 180; // 3 minutes per chunk
 const CONCURRENCY = 4;
 const MAX_RETRIES = 3;
+// atempo max is 2.0 per filter instance; chain filters if raising above 2.0
+const SPEED_FACTOR = 2.0;
 
 export interface TranscriptionResult {
   transcript: string;
@@ -51,6 +53,25 @@ function splitAudioChunk(
       .on("end", () => resolve())
       .on("error", (err: Error) =>
         reject(new Error(`Failed to split audio: ${err.message}`))
+      )
+      .run();
+  });
+}
+
+function speedUpAudio(
+  inputPath: string,
+  outputPath: string,
+  speed: number
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .noVideo()
+      .audioFilter(`atempo=${speed}`)
+      .audioCodec("libmp3lame")
+      .output(outputPath)
+      .on("end", () => resolve())
+      .on("error", (err: Error) =>
+        reject(new Error(`Failed to speed up audio: ${err.message}`))
       )
       .run();
   });
@@ -152,7 +173,21 @@ export async function transcribe(
   apiKey: string
 ): Promise<TranscriptionResult> {
   const client = getOpenAIClient(apiKey);
-  const chunks = await splitAudio(filePath);
+
+  const speedSpinner = createSpinner(`Speeding up audio ${SPEED_FACTOR}x...`);
+  speedSpinner.start();
+  const speedTempDir = createTempDir();
+  const speededFilePath = path.join(speedTempDir, "speeded.mp3");
+  try {
+    await speedUpAudio(filePath, speededFilePath, SPEED_FACTOR);
+    speedSpinner.succeed(`Audio sped up ${SPEED_FACTOR}x`);
+  } catch (error) {
+    speedSpinner.fail("Failed to speed up audio");
+    fs.rmSync(speedTempDir, { recursive: true, force: true });
+    throw error;
+  }
+
+  const chunks = await splitAudio(speededFilePath);
 
   const spinner = createSpinner(
     `Transcribing${chunks.length > 1 ? ` 0/${chunks.length} chunks` : ""}...`
@@ -168,11 +203,10 @@ export async function transcribe(
 
     spinner.succeed("Transcription complete");
 
-    // Clean up chunk temp directory if we created chunks
-    if (chunks.length > 1 && chunks[0] !== filePath) {
-      const chunkDir = path.dirname(chunks[0]);
-      fs.rmSync(chunkDir, { recursive: true, force: true });
+    if (chunks.length > 1) {
+      fs.rmSync(path.dirname(chunks[0]), { recursive: true, force: true });
     }
+    fs.rmSync(speedTempDir, { recursive: true, force: true });
 
     return {
       transcript: transcripts.join(" "),
@@ -180,6 +214,7 @@ export async function transcribe(
     };
   } catch (error) {
     spinner.fail("Transcription failed");
+    fs.rmSync(speedTempDir, { recursive: true, force: true });
     throw error;
   }
 }
