@@ -7,6 +7,10 @@ import { createSpinner, createTempDir } from "./utils";
 // Whisper API has a 25MB file size limit
 const MAX_CHUNK_SIZE_MB = 24;
 const CHUNK_DURATION_SECONDS = 180; // 3 minutes per chunk
+const CONCURRENCY = 4;
+const MAX_RETRIES = 3;
+// atempo max is 2.0 per filter instance; chain filters if raising above 2.0
+const SPEED_FACTOR = 2.0;
 
 export interface TranscriptionResult {
   transcript: string;
@@ -49,6 +53,25 @@ function splitAudioChunk(
       .on("end", () => resolve())
       .on("error", (err: Error) =>
         reject(new Error(`Failed to split audio: ${err.message}`))
+      )
+      .run();
+  });
+}
+
+function speedUpAudio(
+  inputPath: string,
+  outputPath: string,
+  speed: number
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .noVideo()
+      .audioFilter(`atempo=${speed}`)
+      .audioCodec("libmp3lame")
+      .output(outputPath)
+      .on("end", () => resolve())
+      .on("error", (err: Error) =>
+        reject(new Error(`Failed to speed up audio: ${err.message}`))
       )
       .run();
   });
@@ -98,11 +121,51 @@ async function transcribeFile(
 ): Promise<string> {
   const fileStream = fs.createReadStream(filePath);
   const response = await client.audio.transcriptions.create({
-    model: "whisper-1",
+    model: "gpt-4o-mini-transcribe",
     file: fileStream,
     response_format: "text",
   });
   return response as unknown as string;
+}
+
+async function transcribeFileWithRetry(
+  client: OpenAI,
+  filePath: string
+): Promise<string> {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await transcribeFile(client, filePath);
+    } catch (err: unknown) {
+      const status = (err as { status?: number })?.status;
+      const isRetryable = status === 429 || (status !== undefined && status >= 500);
+      if (!isRetryable || attempt === MAX_RETRIES) throw err;
+      const jitter = 0.5 + Math.random() * 0.5;
+      await new Promise((res) => setTimeout(res, 2 ** attempt * 1000 * jitter));
+    }
+  }
+  // TypeScript control flow — loop above always returns or throws
+  throw new Error("unreachable");
+}
+
+async function transcribeChunks(
+  client: OpenAI,
+  chunks: string[],
+  onProgress: (done: number, total: number) => void
+): Promise<string[]> {
+  const results: string[] = new Array(chunks.length);
+  let nextIndex = 0;
+  let completed = 0;
+
+  async function worker() {
+    while (nextIndex < chunks.length) {
+      const i = nextIndex++;
+      results[i] = (await transcribeFileWithRetry(client, chunks[i])).trim();
+      onProgress(++completed, chunks.length);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, chunks.length) }, worker));
+  return results;
 }
 
 export async function transcribe(
@@ -110,31 +173,40 @@ export async function transcribe(
   apiKey: string
 ): Promise<TranscriptionResult> {
   const client = getOpenAIClient(apiKey);
-  const chunks = await splitAudio(filePath);
+
+  const speedSpinner = createSpinner(`Speeding up audio ${SPEED_FACTOR}x...`);
+  speedSpinner.start();
+  const speedTempDir = createTempDir();
+  const speededFilePath = path.join(speedTempDir, "speeded.mp3");
+  try {
+    await speedUpAudio(filePath, speededFilePath, SPEED_FACTOR);
+    speedSpinner.succeed(`Audio sped up ${SPEED_FACTOR}x`);
+  } catch (error) {
+    speedSpinner.fail("Failed to speed up audio");
+    fs.rmSync(speedTempDir, { recursive: true, force: true });
+    throw error;
+  }
+
+  const chunks = await splitAudio(speededFilePath);
 
   const spinner = createSpinner(
-    `Transcribing${chunks.length > 1 ? ` ${chunks.length} chunks` : ""}...`
+    `Transcribing${chunks.length > 1 ? ` 0/${chunks.length} chunks` : ""}...`
   );
   spinner.start();
 
   try {
-    const transcripts: string[] = [];
-
-    for (let i = 0; i < chunks.length; i++) {
-      if (chunks.length > 1) {
-        spinner.text = `Transcribing chunk ${i + 1}/${chunks.length}...`;
+    const transcripts = await transcribeChunks(client, chunks, (done, total) => {
+      if (total > 1) {
+        spinner.text = `Transcribing ${done}/${total} chunks...`;
       }
-      const text = await transcribeFile(client, chunks[i]);
-      transcripts.push(text.trim());
-    }
+    });
 
     spinner.succeed("Transcription complete");
 
-    // Clean up chunk temp directory if we created chunks
-    if (chunks.length > 1 && chunks[0] !== filePath) {
-      const chunkDir = path.dirname(chunks[0]);
-      fs.rmSync(chunkDir, { recursive: true, force: true });
+    if (chunks.length > 1) {
+      fs.rmSync(path.dirname(chunks[0]), { recursive: true, force: true });
     }
+    fs.rmSync(speedTempDir, { recursive: true, force: true });
 
     return {
       transcript: transcripts.join(" "),
@@ -142,6 +214,7 @@ export async function transcribe(
     };
   } catch (error) {
     spinner.fail("Transcription failed");
+    fs.rmSync(speedTempDir, { recursive: true, force: true });
     throw error;
   }
 }
